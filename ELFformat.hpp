@@ -15,17 +15,16 @@ namespace ELF {
 		const uint16_t EM        = 0x003E;
 	
 		const uint16_t EHSIZE    = 0x0040;
-
 		const uint16_t PHENTSIZE = 0x0038;
-		const uint16_t PHNUM     = 0x0002;
-
 		const uint16_t SHENTSIZE = 0x0040;
-		const uint16_t SHNUM     = 0x003; //???
 
 	}
 
+ // ============================================================================
+ // ELF Header
+ // ============================================================================
 
-	struct header {
+	struct Header {
 		uint32_t EI_MAG;      //0x7F454C46
 	
 		uint8_t  EI_CLASS;    //64 BIT;
@@ -49,5 +48,34 @@ namespace ELF {
 		uint16_t E_SHENTSIZE; //section header size
 		uint16_t E_SHNUM;     //number of section headers
 		uint16_t E_SHSTRNDX;  //section header string index -- index of the .shstrtab section.
+	};
+
+ // ============================================================================
+ // Program Header Table 
+ // Contains information of how the executable should be put into the process virtual memory.
+ // ============================================================================
+ 
+	namespace SegType {
+		uint32_t PT_NULL = 0x0000;
+		uint32_t PT_LOAD = 0x0001;
+		uint32_t PT_DYNAMIC = 0x0002;
+	};
+
+	namespace ProgFlags {
+		uint32_t PF_X = 0x1; //use;
+		uint32_t PF_W = 0x2; //write;
+		uint32_t PF_R = 0x4; //read;
+	}
+ 
+	struct ProgramHeader {
+		uint32_t P_TYPE;
+		uint32_t P_FLAGS;
+		uint64_t P_OFFSET; //Segment offset;
+		uint64_t P_VADDR;  //virtual memory offset to load this segment to
+		uint64_t P_PADDR;  //usually = vaddr
+		uint64_t P_FILESZ; //segment size in file
+		uint64_t P_MEMSZ;  //segment size in mem
+		uint64_t P_ALLIGN; //usually 0x1000
+
 	};
 }
