@@ -45,6 +45,8 @@ namespace TokenizerNS {
 		}
 	}
 
+	Token::Token(const char* lexem, TokenizerNS::token_type type, Operator::code code): lexem(lexem), type(type), code(code){};
+
 	Tokenizer::Tokenizer(FILE* input_file){
 
 		fseek(input_file, 0L, SEEK_END);
