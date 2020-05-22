@@ -101,7 +101,7 @@ namespace Operator {
 	};
 
 	const char* o_brack_names[] = {
-		"ideed,",
+		"indeed,",
 		"obviously,",
 		"definetly,",
 		"also,"

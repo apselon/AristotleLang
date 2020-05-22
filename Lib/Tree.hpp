@@ -16,7 +16,7 @@ public:
             TNode_t* parent_ = nullptr):
             key(key_), left_son(left_), right_son(right_), parent_node(parent_){};
 
-	virtual ~TNode_t(){ this->remove(); };
+	//virtual ~TNode_t(){ this->remove(); };
 	
 	virtual TNode_t* parent() { return this->parent_node; }
 	virtual TNode_t* left()   { return this->left_son;    }

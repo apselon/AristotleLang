@@ -15,6 +15,7 @@ namespace ASTreeNS {
 		
 	public:
 		ASTree(TokenizerNS::Token*);
+		~ASTree();
 		ASTNode_t root();
 
 		void traverse_nodes(void (*action)(ASTNode_t*));

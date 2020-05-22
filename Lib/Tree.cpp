@@ -26,27 +26,16 @@ template <typename T>
 void TNode_t<T>::remove_subtree(){
 
 	if (this != nullptr){
-		if (this->left_son) this->left_son->remove_subtree();
-		if (this->right_son) this->right_son->remove_subtree();
+		if (this->left_son != nullptr) this->left_son->remove_subtree();
+		if (this->right_son != nullptr) this->right_son->remove_subtree();
 
-		this->remove();
+		delete this;
 	}
 }
 
 template <typename T>
 T TNode_t<T>::remove(){
-
-	if (this->parent_node != nullptr && this->is_left()){
-		this->parent_node->left_son = nullptr;
-	}
-
-	else if (this->parent_node != nullptr && this->is_right()){
-		this->parent_node->right_son = nullptr;
-	}
-
-	T val = this->key;
-
-	return val;
+	
 }
 
 template <typename T>

@@ -73,6 +73,7 @@ namespace TokenizerNS {
 		}
 
 		lexems -= num_tokens_;
+		program -= file_size;
 
 		tokens_ = new Token[num_tokens_]();
 	
@@ -86,8 +87,8 @@ namespace TokenizerNS {
 	}
 
 	Tokenizer::~Tokenizer(){
-	//	delete [] lexems;
-	//	delete [] program;
-	//	delete [] tokens_;
+//		delete [] lexems;
+//		delete [] program;
+//		delete [] tokens_;
 	}
 };

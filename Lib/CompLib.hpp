@@ -4,7 +4,6 @@
 #include <cctype>
 #include <cstring>
 #include <cassert>
-#include "../Tokenizer/Tokenizer.cpp"
 #include "DSL.h"
 
 namespace Consts {

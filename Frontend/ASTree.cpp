@@ -3,14 +3,11 @@
 
 namespace ASTreeNS {
 	ASTree::ASTree(TokenizerNS::Token* cur_token): cur_token(cur_token){
-		/*
-		parsers[Operator::IF] = &ASTree::parse_if;
-		parsers[Operator::WHILE] = &ASTree::parse_while;
-		parsers[Operator::DEC_VAR] = &ASTree::parse_var_decl;
-		parsers[Operator::DEC_FUNC] = &ASTree::parse_func_decl;
-		*/
-
 		root_->attach_right(parse_block());
+	}
+
+	ASTree::~ASTree(){
+		root_->remove_subtree();
 	}
 
 	void ASTree::list_nodes(ASTNode_t* cur_node, FILE* out){
@@ -79,6 +76,13 @@ namespace ASTreeNS {
 	}
 	
 	ASTNode_t* ASTree::parse_block(){
+
+		printf("%s %d\n", cur_token->lexem, cur_token->code);	
+
+		if (cur_token->code != Operator::O_BRACK){
+			__asm__("int $3");
+		}
+
 		assert(cur_token->code == Operator::O_BRACK);
 		++cur_token;
 
@@ -100,7 +104,7 @@ namespace ASTreeNS {
 
 	ASTNode_t* ASTree::parse_operator(){
 
-		ASTNode_t* val = new ASTNode_t(SPEC_BLOCK);
+		ASTNode_t* val = nullptr; 
 
 		switch (cur_token->code){
 			case Operator::IF:
@@ -222,7 +226,7 @@ namespace ASTreeNS {
 	}
 
 	ASTNode_t* ASTree::parse_print(){
-		assert(cur_token->code == Operator::RETURN);
+		assert(cur_token->code == Operator::WRITE);
 		++cur_token;
 
 		ASTNode_t* val = parse_expression();
@@ -284,14 +288,16 @@ namespace ASTreeNS {
 		assert(cur_token->code == Operator::O_BRACK);		
 		++cur_token;
 
-		ASTNode_t* comma = new ASTNode_t(TokenizerNS::Token(",", TokenizerNS::OP, Operator::COMMA));
+		ASTNode_t* comma = new ASTNode_t(TokenizerNS::Token("VARLIST", TokenizerNS::OP, Operator::COMMA));
 		ASTNode_t* next_comma = nullptr;
 		ASTNode_t* val = comma;
 
 		while (cur_token->code != Operator::C_BRACK){
 			comma->attach_right(parse_expression());
-			next_comma = new ASTNode_t(TokenizerNS::Token(",", TokenizerNS::OP, Operator::COMMA));
+			next_comma = new ASTNode_t(TokenizerNS::Token("VARLIST", TokenizerNS::OP, Operator::COMMA));
 			comma->attach_left(next_comma);
+
+			comma = next_comma;
 		}
 
 		++cur_token;
