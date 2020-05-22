@@ -2,10 +2,85 @@
 #include "ASTree.hpp"
 
 namespace ASTreeNS {
-	ASTree::ASTree(TokenizerNS::Token* cur_token):cur_token(cur_token){}
+	ASTree::ASTree(TokenizerNS::Token* cur_token): cur_token(cur_token){
+		/*
+		parsers[Operator::IF] = &ASTree::parse_if;
+		parsers[Operator::WHILE] = &ASTree::parse_while;
+		parsers[Operator::DEC_VAR] = &ASTree::parse_var_decl;
+		parsers[Operator::DEC_FUNC] = &ASTree::parse_func_decl;
+		*/
+
+		root_->attach_right(parse_block());
+	}
+
+	void ASTree::list_nodes(ASTNode_t* cur_node, FILE* out){
+
+    	assert(cur_node != NULL);
+
+		if (cur_node->left() != nullptr){
+              list_nodes(cur_node->left(), out);
+		}
+
+		if (cur_node->right() != nullptr){
+              list_nodes(cur_node->right(), out);
+		}
+
+		fprintf(out, "\t\"%p\" [label = \"{%p |%s |%s}\"]\n", cur_node, cur_node, cur_node->key.lexem, 
+		        (cur_node->key.code >= 0)?(Operator::op_code_strs[cur_node->key.code]):("NOT_OP"));
+    }
+
+	void generate_arrows(ASTNode_t* cur_node, FILE* out){
+
+		assert(cur_node != NULL);
+
+        fprintf(out, "\tedge [color = \"#19A302\"] ;\n");
+        if (cur_node->left() != nullptr){
+              fprintf(out, "\t\"%p\" -> \"%p\";\n", cur_node, cur_node->left());
+              generate_arrows(cur_node->left(), out);
+          }
+
+        fprintf(out, "\tedge [color = \"#C00303\"] ;\n");
+        if (cur_node->right() != nullptr){
+        	fprintf(out, "\t\"%p\" -> \"%p\";\n", cur_node, cur_node->right());
+            generate_arrows(cur_node->right(), out);
+        }
+	}
+
+
+	void ASTree::traverse_nodes(void (*action)(ASTNode_t*), ASTNode_t* cur){
+		assert(cur != nullptr);
+
+		if (cur->left() != nullptr){
+			traverse_nodes(action, cur->left());
+		}
+
+		if (cur->right() != nullptr){
+			traverse_nodes(action, cur->right());
+		}
+
+		action(cur);
+	}
+
+	void ASTree::dump(const char* filename){
+		assert(filename != nullptr);
+
+		FILE* dump_f = fopen(filename, "w");
+
+		fprintf(dump_f, "digraph List {\n");
+		fprintf(dump_f, "\tnode [shape=\"record\", fontsize=15] ;\n");
+		fprintf(dump_f, "\trankdir=TB;\n");
+
+		list_nodes(root_, dump_f);
+		generate_arrows(root_, dump_f);
+
+        fprintf(dump_f, "}");
+
+        fclose(dump_f);
+	}
 	
 	ASTNode_t* ASTree::parse_block(){
 		assert(cur_token->code == Operator::O_BRACK);
+		++cur_token;
 
 		ASTNode_t* block = new ASTNode_t(SPEC_BLOCK);
 		ASTNode_t* new_block = nullptr;
@@ -65,6 +140,8 @@ namespace ASTreeNS {
 				printf("OP %d (%s) can not be parsed\n", cur_token->code, Operator::op_code_strs[cur_token->code]);
 				break;
 		}
+
+		return val;
 	}
 
 	ASTNode_t* ASTree::parse_if(){

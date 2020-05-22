@@ -1,6 +1,8 @@
 #pragma once
+
 #include "../Lib/CompLib.hpp"
 #include "../Lib/Tree.cpp"
+#include "../Tokenizer/Tokenizer.cpp"
 
 namespace ASTreeNS {
 	using ASTNode_t = TNode_t<TokenizerNS::Token>;
@@ -9,10 +11,16 @@ namespace ASTreeNS {
 	private:
 		ASTNode_t* root_ = new ASTNode_t(TokenizerNS::Token(";_START", TokenizerNS::ID, Operator::BLOCK));
 		TokenizerNS::Token* cur_token = nullptr;
+//		ASTNode_t* (parsers[30])(void){};
 		
 	public:
 		ASTree(TokenizerNS::Token*);
 		ASTNode_t root();
+
+		void traverse_nodes(void (*action)(ASTNode_t*));
+		void traverse_nodes(void (*action)(ASTNode_t*), ASTNode_t* cur);
+		void list_nodes(ASTNode_t* cur_node, FILE* out);
+
 		void dump(const char* filename);
 		
 		ASTNode_t* parse_block();
