@@ -1,6 +1,6 @@
 #pragma once
-#include "../Lib/CompLib.hpp"
 #include "../Lib/Operators.hpp"
+#include "../Lib/CompLib.hpp"
 
 namespace TokenizerNS {
 	enum token_type {
@@ -23,7 +23,7 @@ namespace TokenizerNS {
 
 	class Tokenizer {
 	private:
-		const char* program = nullptr;
+		char* program = nullptr;
 		const char** lexems = nullptr;
 		Token* tokens_      = nullptr;
 

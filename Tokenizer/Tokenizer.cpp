@@ -1,7 +1,8 @@
+#pragma once
 #include "Tokenizer.hpp"
 
 namespace TokenizerNS {
-	void skip_spaces(const char** text){
+	void skip_spaces(char** const text){
 		while (isspace(**text)){
 			++(*text);
 		}
@@ -54,8 +55,11 @@ namespace TokenizerNS {
 
 		rewind(input_file);
 		
-		program = new const char [file_size + 128 ]();
+		program = new char [file_size + 128 ]();
 		lexems  = new const char*[Consts::BUF_SIZE]();
+
+		setvbuf(input_file, nullptr, _IOFBF, file_size + 128);
+		fread(program, sizeof(char), file_size, input_file);
 
 		int offset = 0;
 
@@ -75,5 +79,15 @@ namespace TokenizerNS {
 		for (size_t i = 0; i < num_tokens_; ++i){
 			tokens_[i] = Token(lexems[i]);
 		}
+	}
+
+	Token* Tokenizer::tokens(){
+		return tokens_;
+	}
+
+	Tokenizer::~Tokenizer(){
+	//	delete [] lexems;
+	//	delete [] program;
+	//	delete [] tokens_;
 	}
 };
