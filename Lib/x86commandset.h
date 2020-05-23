@@ -1,0 +1,9 @@
+#include "CompLib.hpp"
+
+namespace Intruction {
+	BASIC_INSTRUCTION_X86(add);
+	BASIC_INSTRUCTION_X86(sub);
+	BASIC_INSTRUCTION_X86(mul);
+	BASIC_INSTRUCTION_X86(div);
+	BASIC_INSTRUCTION_X86(cmp);
+};

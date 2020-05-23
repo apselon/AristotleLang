@@ -11,19 +11,7 @@ namespace ASTreeNS {
 	private:
 		ASTNode_t* root_ = new ASTNode_t(TokenizerNS::Token(";_START", TokenizerNS::ID, Operator::BLOCK));
 		TokenizerNS::Token* cur_token = nullptr;
-//		ASTNode_t* (parsers[30])(void){};
-		
-	public:
-		ASTree(TokenizerNS::Token*);
-		~ASTree();
-		ASTNode_t root();
 
-		void traverse_nodes(void (*action)(ASTNode_t*));
-		void traverse_nodes(void (*action)(ASTNode_t*), ASTNode_t* cur);
-		void list_nodes(ASTNode_t* cur_node, FILE* out);
-
-		void dump(const char* filename);
-		
 		ASTNode_t* parse_block();
 		ASTNode_t* parse_operator();
 		ASTNode_t* parse_if();
@@ -44,6 +32,17 @@ namespace ASTreeNS {
 		ASTNode_t* parse_brackets();
 		ASTNode_t* parse_number();
 
+	public:
+		ASTree(TokenizerNS::Token*);
+		~ASTree();
+		ASTNode_t* root() const;
+
+		void traverse_nodes(void (*action)(ASTNode_t*));
+		void traverse_nodes(void (*action)(ASTNode_t*), ASTNode_t* cur);
+		void list_nodes(ASTNode_t* cur_node, FILE* out);
+
+		void dump(const char* filename);
+		
 		
 	};
 };

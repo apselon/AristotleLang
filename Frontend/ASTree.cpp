@@ -10,6 +10,10 @@ namespace ASTreeNS {
 		root_->remove_subtree();
 	}
 
+	ASTNode_t* ASTree::root() const {
+		return root_;
+	}
+
 	void ASTree::list_nodes(ASTNode_t* cur_node, FILE* out){
 
     	assert(cur_node != NULL);
