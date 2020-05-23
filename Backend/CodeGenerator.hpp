@@ -1,12 +1,12 @@
 #pragma once
+#include <vector>
 #include "../Lib/CompLib.hpp"
 #include "../Frontend/ASTree.cpp"
 
 namespace CodeGeneratorNS {
 	class CodeGenerator {
 	private:
-		char* text = new char[8192]();	
-		char* data = new char[1024]();
+		std::vector<Assembly::Instruction*> instructions;
 
 		ASTreeNS::ASTNode_t* cur = nullptr;
 

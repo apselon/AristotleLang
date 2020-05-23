@@ -1,5 +1,0 @@
-mov reg, reg
-mov reg, val
-mov reg, [reg + ofset]
-a,s,m,d reg, reg
-
