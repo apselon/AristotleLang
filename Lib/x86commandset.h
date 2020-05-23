@@ -41,9 +41,9 @@ namespace Assembly {
 	
 	class Instruction {
 	public:
-		virtual const char* assembly();
-		virtual const char* elf();
-		virtual size_t size();
+		virtual const char* assembly() {return 0;};
+		virtual const char* elf() { return 0;}
+		virtual size_t size() {return 0;};
 	};
 //===========================================================================//
 //                                   MOV
@@ -204,6 +204,23 @@ namespace Assembly {
 		}
 	};
 
+	class SubReg2Val: public Instruction {
+	private:
+		Registers::Reg dst;
+		int64_t val;
+
+	public:	
+		SubReg2Val(Registers::Reg dst, int64_t val): dst(dst), val(val) {};
+
+		const char* assembly(){
+
+			static char output[128] = "";
+			sprintf(output, "\tsub %s, %ld", Registers::names[dst], val);
+
+			return output;
+		}
+	};
+
 //===========================================================================//
 //                                   MUL
 //===========================================================================//
@@ -253,7 +270,7 @@ namespace Assembly {
 	class Ret: public Instruction {
 	public:	
 		const char* assembly(){
-			static char output[128] = "\t ret";
+			static char output[128] = "\tret";
 			return output;
 		}
 	};
