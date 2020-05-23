@@ -77,12 +77,6 @@ namespace ASTreeNS {
 	
 	ASTNode_t* ASTree::parse_block(){
 
-		printf("%s %d\n", cur_token->lexem, cur_token->code);	
-
-		if (cur_token->code != Operator::O_BRACK){
-			__asm__("int $3");
-		}
-
 		assert(cur_token->code == Operator::O_BRACK);
 		++cur_token;
 
@@ -92,6 +86,8 @@ namespace ASTreeNS {
 
 		while (cur_token->code != Operator::C_BRACK){
 			block->attach_right(parse_operator());
+			if (cur_token->code == Operator::C_BRACK) break;
+
 			new_block = new ASTNode_t(SPEC_BLOCK);
 			block->attach_left(new_block);
 
@@ -294,6 +290,8 @@ namespace ASTreeNS {
 
 		while (cur_token->code != Operator::C_BRACK){
 			comma->attach_right(parse_expression());
+			if (cur_token->code == Operator::C_BRACK) break;
+
 			next_comma = new ASTNode_t(TokenizerNS::Token("VARLIST", TokenizerNS::OP, Operator::COMMA));
 			comma->attach_left(next_comma);
 
