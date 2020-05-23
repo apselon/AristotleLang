@@ -428,4 +428,27 @@ namespace Assembly {
 		}
 	};
 
+	class Label: public Instruction {
+	private:
+		const char* name  = nullptr;
+		const int64_t num = -1;
+	
+	public:
+		explicit Label(int64_t num): num(num) {} 
+		explicit Label(const char* name): name(name) {}
+		
+
+		const char* assembly(){
+			static char output[128] = "";
+			if (num == -1){
+				sprintf(output, "%s:", name); 
+			}
+			
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+	};
 }

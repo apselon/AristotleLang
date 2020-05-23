@@ -45,6 +45,13 @@ namespace CodeGeneratorNS {
 	}
 
 	void CodeGenerator::generate_body(ASTreeNS::ASTNode_t* node){
+		assert(node != nullptr);
+
+		cur_local_var_num = 0;
+		local_offsets = new std::vector<int64_t>();
+
+		instructions.push_back(new Assembly::Label(num_blocks++));
+
 		while (node->right() != nullptr){
 			generate_operator(node->right());
 
@@ -66,34 +73,57 @@ namespace CodeGeneratorNS {
 		}
 
 		if (node->key.type == TokenizerNS::NUM){
-			instructions.push_back(new Assembly::MovVal2Reg(Assembly::Registers::R10, atoi(node->key.lexem)));
+			instructions.push_back(new Assembly::MovVal2Reg(Assembly::Registers::R10,
+						                                    atoi(node->key.lexem)));
 		}
 
 		if (node->key.type == TokenizerNS::ID){
-			//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA	
+			instructions.push_back(new Assembly::MovMem2Reg(Assembly::Registers::R10, Assembly::Registers::RBP,
+			                                                local_offsets->at(cur_local_var_num++)));
 		}
 
 		if (node->key.type == TokenizerNS::OP && node->key.code != Operator::COMMA){
 			switch (node->key.code){
 				case Operator::ADD:
-					instructions.push_back(new Assembly::AddReg2Reg(Assembly::Registers::R10, Assembly::Registers::R11));
+					instructions.push_back(new Assembly::AddReg2Reg(Assembly::Registers::R10,
+					                                                Assembly::Registers::R11));
 					break;
 
 				case Operator::SUB:
-					instructions.push_back(new Assembly::SubReg2Reg(Assembly::Registers::R10, Assembly::Registers::R11));
+					instructions.push_back(new Assembly::SubReg2Reg(Assembly::Registers::R10,
+					                                                Assembly::Registers::R11));
 					break;
 
 				case Operator::MUL:
-					instructions.push_back(new Assembly::MulReg2Reg(Assembly::Registers::R10, Assembly::Registers::R11));
+					instructions.push_back(new Assembly::MulReg2Reg(Assembly::Registers::R10,
+					                                                Assembly::Registers::R11));
 					break;
 
 				case Operator::DIV:
-					instructions.push_back(new Assembly::DivReg2Reg(Assembly::Registers::R10, Assembly::Registers::R11));
+					instructions.push_back(new Assembly::DivReg2Reg(Assembly::Registers::R10,
+					                                                Assembly::Registers::R11));
 					break;
 				
 				default:
 					assert("Unknown operator code" && false);
 			}
+		}
+	}
+
+	void CodeGenerator::count_local_vars(ASTreeNS::ASTNode_t* node, std::vector<int64_t>* offset, int& num_vars){
+		assert(node != nullptr);
+
+		if (cur->key.type == TokenizerNS::ID && cur->parent()->key.code == Operator::DEC_VAR){
+			++num_vars;
+			offset->emplace_back(num_vars * (-8));
+		}
+
+		if (node->left() != nullptr){
+			count_local_vars(node->left(), offset, num_vars);
+		}
+
+		if (node->right() != nullptr){
+			count_local_vars(node->right(), offset, num_vars);
 		}
 	}
 }

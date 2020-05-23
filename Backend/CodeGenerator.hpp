@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include "../Lib/CompLib.hpp"
 #include "../Frontend/ASTree.cpp"
 
@@ -25,6 +24,13 @@ namespace CodeGeneratorNS {
 		void generate_input(ASTreeNS::ASTNode_t* node);
 		void generate_func_declaration(ASTreeNS::ASTNode_t* node);
 		void generate_nop();
+
+		std::vector<int64_t>* local_offsets = nullptr;
+		size_t cur_local_var_num = 0;
+
+		size_t num_blocks = 0;
+
+		void count_local_vars(ASTreeNS::ASTNode_t* node, std::vector<int64_t>* offsets, int& num_vars);
 
 	public:
 		CodeGenerator(const ASTreeNS::ASTree& tree);

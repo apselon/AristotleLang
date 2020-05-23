@@ -4,6 +4,8 @@
 #include <cctype>
 #include <cstring>
 #include <cassert>
+#include <vector>
+#include <unordered_map>
 
 #include "DSL.h"
 #include "x86commandset.h"
