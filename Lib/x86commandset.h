@@ -12,7 +12,10 @@ namespace Assembly {
 			RBP,
 			RSP,
 			RSI,
-			RDI
+			RDI,
+			R10,
+			R11,
+			R12
 		};
 	
 		const char* names[] = {
@@ -23,7 +26,10 @@ namespace Assembly {
 			"rbp",
 			"rsp",
 			"rsi",
-			"rdi"
+			"rdi",
+			"r10",
+			"r11",
+			"r12"
 		};
 
 		const char codes[] = {
@@ -138,8 +144,9 @@ namespace Assembly {
 		Registers::Reg dst;
 		Registers::Reg src;
 
-		AddReg2Reg(Registers::Reg dst, Registers::Reg src): dst(dst), src(src) {};
 	public:	
+		AddReg2Reg(Registers::Reg dst, Registers::Reg src): dst(dst), src(src) {};
+
 		const char* assembly(){
 
 			static char output[128] = "";
@@ -367,6 +374,10 @@ namespace Assembly {
 		}
 	};
 
+//===========================================================================//
+//                                  CMP
+//===========================================================================//
+
 	class CmpReg2Reg: public Instruction {
 	private:
 		Registers::Reg dst;
@@ -377,6 +388,42 @@ namespace Assembly {
 		const char* assembly(){
 			static char output[128] = "";
 			sprintf(output, "\tcmp %s, %s", Registers::names[dst], Registers::names[src]); 
+			return output;
+		}
+	};
+
+//===========================================================================//
+//                                 PUSH
+//===========================================================================//
+
+	class PushReg: public Instruction {
+	private:
+		Registers::Reg src;
+	
+	public:
+		PushReg(Registers::Reg src): src(src){};
+
+		const char* assembly(){
+			static char output[128] = "";
+			sprintf(output, "\tpush %s", Registers::names[src]); 
+			return output;
+		}
+	};
+
+//===========================================================================//
+//                                POP 
+//===========================================================================//
+//
+	class PopReg: public Instruction {
+	private:
+		Registers::Reg dst;
+	
+	public:
+		PopReg(Registers::Reg dst): dst(dst){};
+
+		const char* assembly(){
+			static char output[128] = "";
+			sprintf(output, "\tpop %s", Registers::names[dst]); 
 			return output;
 		}
 	};

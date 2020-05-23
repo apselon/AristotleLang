@@ -6,6 +6,7 @@
 #include <cassert>
 
 #include "DSL.h"
+#include "x86commandset.h"
 
 namespace Consts {
 	constexpr int BUF_SIZE = 4096;
