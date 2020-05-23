@@ -53,6 +53,6 @@ namespace CodeGeneratorNS {
 	}
 
 	void generate_var_declaration(ASTreeNS::ASTNode_t* node){
-		
+				
 	}
 }
