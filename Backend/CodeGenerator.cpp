@@ -4,6 +4,8 @@ namespace CodeGeneratorNS {
 	CodeGenerator::CodeGenerator(const ASTreeNS::ASTree& tree){
 		cur	= tree.root();
 		instructions.push_back(new Assembly::Section(".text"));
+		instructions.push_back(new Assembly::Array("num_format", "'%d', 10d, 0"));
+		instructions.push_back(new Assembly::Extern("_vprintf"));
 		instructions.push_back(new Assembly::Global("_start"));
 		generate_block(cur->right());
 		
@@ -28,7 +30,7 @@ namespace CodeGeneratorNS {
 			generate_func_declaration(node);
 			break;
 		case Operator::WRITE:
-		//	generate_print(node);
+			generate_print(node);
 			break;
 		case Operator::EXIT:
 			generate_exit(node);
@@ -102,13 +104,16 @@ namespace CodeGeneratorNS {
 						                                    atoi(node->key.lexem)));
 		}
 
-		if (node->key.type == TokenizerNS::ID){
-			auto name = local_offsets->find(node->key.lexem);
+		if (node->key.type == TokenizerNS::ID && node->parent()->key.code != Operator::CALL){
 
-			if (name != local_offsets->end())
+			try{
 				instructions.push_back(new Assembly::MovMem2Reg(Assembly::Registers::R10, Assembly::Registers::RBP,
-			                                                    local_offsets->at(node->key.lexem)));
+			                                                local_offsets->at(node->key.lexem)));
 			
+			} catch (...){
+				asm("int $3");
+				std::cout << node->key.lexem << "!!!\n" ;
+			}
 		}
 
 		if (node->key.type == TokenizerNS::OP && node->key.code != Operator::COMMA){
@@ -188,10 +193,6 @@ namespace CodeGeneratorNS {
 
 		generate_expression(node->right());
 
-	for (auto const& pair: *local_offsets) {
-        std::cout << "{(" << pair.first << "): " << pair.second << "}\n";
-    }
-
 		instructions.push_back(new Assembly::MovReg2Mem(Assembly::Registers::RBP,
 		                       local_offsets->at(node->left()->key.lexem), Assembly::Registers::R10));
 
@@ -222,7 +223,7 @@ namespace CodeGeneratorNS {
 		assert(node != nullptr);
 		assert(node->key.code == Operator::IF);
 
-		instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
+		//instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
 
 		generate_expression(node->left()->left());
 		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::R12, Assembly::Registers::R10));
@@ -230,7 +231,7 @@ namespace CodeGeneratorNS {
 		generate_expression(node->left()->right());
 		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::R13, Assembly::Registers::R10));
 
-		instructions.push_back(new Assembly::PopReg(Assembly::Registers::R10));
+		//instructions.push_back(new Assembly::PopReg(Assembly::Registers::R10));
 
 		instructions.push_back(new Assembly::CmpReg2Reg(Assembly::Registers::R12, Assembly::Registers::R13));
 
@@ -280,6 +281,16 @@ namespace CodeGeneratorNS {
 		instructions.push_back(new Assembly::MovVal2Reg(Assembly::Registers::RAX, 60));
 		instructions.push_back(new Assembly::MovVal2Reg(Assembly::Registers::RDI, 0));
 		instructions.push_back(new Assembly::Syscall());
+	}
+
+	void CodeGenerator::generate_print(ASTreeNS::ASTNode_t* node){
+		assert(node != nullptr);
+		assert(node->key.code == Operator::WRITE);
+
+		instructions.push_back(new Assembly::MovMem2Reg(Assembly::Registers::RAX, "num_format"));
+		generate_expression(node->right());
+		instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
+		instructions.push_back(new Assembly::Call("_vprintf"));
 	}
 
 	void CodeGenerator::write(FILE* output_f){

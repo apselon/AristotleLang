@@ -90,11 +90,14 @@ namespace Assembly {
 	class MovMem2Reg: public Instruction {
 	private:
 		Registers::Reg src_reg = Registers::NOT_REG;
+		const char* src_label = nullptr;
 		Registers::Reg dst;
-		int64_t offset = 0;
+		int64_t offset = -666;
 
 	public:
 		MovMem2Reg(Registers::Reg dst, Registers::Reg src_reg, int64_t offset): src_reg(src_reg), dst(dst), offset(offset) {}
+
+		MovMem2Reg(Registers::Reg dst, const char* src_label): src_label(src_label), dst(dst) {}
 		MovMem2Reg(Registers::Reg dst, int64_t offset): dst(dst), offset(offset) {}
 
 		const char* assembly(){
@@ -105,8 +108,12 @@ namespace Assembly {
 				sprintf(output, "\t\tmov %s, [%s + %ld]", Registers::names[dst], Registers::names[src_reg], offset);
 			}
 
-			else {
+			else if (offset != -666) {
 				sprintf(output, "\t\tmov %s, [%ld]", Registers::names[dst], offset);
+			}
+
+			else {
+				sprintf(output, "\t\tmov %s, %s", Registers::names[dst], src_label);
 			}
 
 			return output;
@@ -570,6 +577,22 @@ namespace Assembly {
 		}
 	};
 
+	class Array: public Instruction {
+	private:
+		const char* name  = nullptr;
+		const char* val   = nullptr;
+	
+	public:
+		Array(const char* name, const char* val): name(name), val(val) {}
+		
+
+		const char* assembly(){
+			static char output[128] = "";
+			sprintf(output, "%s db %s", name, val); 
+			return output;
+		}
+	};
+
 	class Comment: public Instruction {
 	private:
 		const char* text = nullptr; 
@@ -628,6 +651,22 @@ namespace Assembly {
 		const char* assembly(){
 			static char output[128] = "";
 			sprintf(output, "\t\tglobal %s", name);
+			
+			return output;
+		}
+
+	};
+
+	class Extern: public Instruction {
+	private:
+		const char* name;
+	
+	public:
+		Extern(const char* name): name(name) {};
+		
+		const char* assembly(){
+			static char output[128] = "";
+			sprintf(output, "\t\textern %s", name);
 			
 			return output;
 		}

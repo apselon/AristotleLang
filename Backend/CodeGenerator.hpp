@@ -20,10 +20,10 @@ namespace CodeGeneratorNS {
 		void push_arguments(ASTreeNS::ASTNode_t* node, size_t& num_args);
 		void generate_branching(ASTreeNS::ASTNode_t* node);
 		void generate_exit(ASTreeNS::ASTNode_t* node);
+		void generate_print(ASTreeNS::ASTNode_t* node);
 
 		/*
 		void generate_condition(ASTreeNS::ASTNode_t* node);
-		void generate_print(ASTreeNS::ASTNode_t* node);
 		void generate_sqrt(ASTreeNS::ASTNode_t* node);
 		void generate_input(ASTreeNS::ASTNode_t* node);
 		void generate_nop();
