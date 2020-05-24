@@ -3,7 +3,7 @@
 namespace CodeGeneratorNS {
 	CodeGenerator::CodeGenerator(const ASTreeNS::ASTree& tree){
 		cur	= tree.root();
-		generate_body(cur->right());
+		generate_block(cur->right());
 		
 	}
 
@@ -24,7 +24,7 @@ namespace CodeGeneratorNS {
 		//	generate_return(node);
 			break;
 		case Operator::DEC_FUNC:
-		//	generate_func_declaration(node);
+			generate_func_declaration(node);
 			break;
 		case Operator::WRITE:
 		//	generate_print(node);
@@ -45,19 +45,12 @@ namespace CodeGeneratorNS {
 		}
 	}
 
-	void CodeGenerator::generate_body(ASTreeNS::ASTNode_t* node){
+	void CodeGenerator::generate_block(ASTreeNS::ASTNode_t* node){
 		assert(node != nullptr);
+		assert(node->key.code == Operator::BLOCK);
 
-		cur_local_vars_num = 0;
-		local_offsets = new std::unordered_map<const char*, int64_t>();
-
-		instructions.push_back(new Assembly::Label(num_blocks++));
-		instructions.push_back(new Assembly::PushReg(Assembly::Registers::RBP));
-		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RBP, Assembly::Registers::RSP));
-
-		count_local_vars(node, cur_local_vars_num);
-
-		instructions.push_back(new Assembly::SubReg2Val(Assembly::Registers::RSP, cur_local_vars_num * 8));
+		size_t cur_bloc_num = num_blocks++;
+		instructions.push_back(new Assembly::Label(cur_bloc_num));
 
 		while (node != nullptr && node->right() != nullptr){
 			generate_operator(node->right());
@@ -65,9 +58,33 @@ namespace CodeGeneratorNS {
 			node = node->left();
 		}
 
+		instructions.push_back(new Assembly::Comment(cur_bloc_num));
+	}
+
+	void CodeGenerator::generate_func_declaration(ASTreeNS::ASTNode_t* node){
+		assert(node != nullptr);
+		assert(node->key.code == Operator::DEC_FUNC);
+
+		cur_local_vars_num = 0;
+		cur_local_args_num = 0;
+
+		local_offsets = new std::map<const char*, int64_t, cmp_str>();
+
+		instructions.push_back(new Assembly::Label(node->right()->key.lexem));
+		instructions.push_back(new Assembly::Comment("{"));
+		instructions.push_back(new Assembly::PushReg(Assembly::Registers::RBP));
+		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RBP, Assembly::Registers::RSP));
+
+		count_local_vars(node->right(), cur_local_vars_num);
+		count_function_arguments(node->left(), cur_local_args_num);
+
+		generate_block(node->right()->right());
+
+		instructions.push_back(new Assembly::SubReg2Val(Assembly::Registers::RSP, cur_local_vars_num * 8));
 		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RSP, Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::PopReg(Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::Ret());
+		instructions.push_back(new Assembly::Comment("}"));
 	}
 
 	void CodeGenerator::generate_expression(ASTreeNS::ASTNode_t* node){
@@ -89,8 +106,12 @@ namespace CodeGeneratorNS {
 		}
 
 		if (node->key.type == TokenizerNS::ID){
-			instructions.push_back(new Assembly::MovMem2Reg(Assembly::Registers::R10, Assembly::Registers::RBP,
-			                                                local_offsets->at(node->key.lexem)));
+			auto name = local_offsets->find(node->key.lexem);
+
+			//if (name != local_offsets->end())
+				instructions.push_back(new Assembly::MovMem2Reg(Assembly::Registers::R10, Assembly::Registers::RBP,
+			                                                    local_offsets->at(node->key.lexem)));
+			
 		}
 
 		if (node->key.type == TokenizerNS::OP && node->key.code != Operator::COMMA){
@@ -124,9 +145,9 @@ namespace CodeGeneratorNS {
 	void CodeGenerator::count_local_vars(ASTreeNS::ASTNode_t* node, size_t& num_vars){
 		assert(node != nullptr);
 
-		if (node->key.type == TokenizerNS::ID){
+		if (node->key.code == Operator::DEC_VAR){
 			++num_vars;
-			local_offsets->emplace(node->key.lexem, num_vars * (-8));
+			local_offsets->emplace(node->right()->key.lexem, num_vars * (-8));
 		}
 
 		if (node->left() != nullptr){
@@ -140,10 +161,29 @@ namespace CodeGeneratorNS {
 
 	void CodeGenerator::generate_var_init(ASTreeNS::ASTNode_t* node){
 		assert(node != nullptr);
+		assert(node->key.code == Operator::ASSGN);
+
 		generate_expression(node->right());
+
+	for (auto const& pair: *local_offsets) {
+        std::cout << "{(" << pair.first << "): " << pair.second << "}\n";
+    }
+
 		instructions.push_back(new Assembly::MovReg2Mem(Assembly::Registers::RBP,
 		                       local_offsets->at(node->left()->key.lexem), Assembly::Registers::R10));
 
+	}
+
+	void CodeGenerator::count_function_arguments(ASTreeNS::ASTNode_t* node, size_t& num_args){
+		assert(node != nullptr);
+		assert(node->key.code == Operator::COMMA);
+
+		if (node->right() != nullptr){
+			++num_args;
+			local_offsets->emplace(node->right()->key.lexem, (num_args + 1) * 8);
+
+			if (node->left() != nullptr) count_function_arguments(node->left(), num_args);
+		}
 	}
 
 	void CodeGenerator::write(FILE* output_f){

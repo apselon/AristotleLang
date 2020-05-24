@@ -60,7 +60,7 @@ namespace Assembly {
 			const char* assembly(){
 
 				static char output[128] = "";
-				sprintf(output, "\tmov %s, %s", Registers::names[dst], Registers::names[src]);
+				sprintf(output, "\t\tmov %s, %s", Registers::names[dst], Registers::names[src]);
 
 				return output;
 			}
@@ -76,7 +76,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tmov %s, %ld", Registers::names[dst], val);
+			sprintf(output, "\t\tmov %s, %ld", Registers::names[dst], val);
 			return output;
 		}
 	};
@@ -96,11 +96,11 @@ namespace Assembly {
 			static char output[128] = "";
 
 			if (src_reg != Registers::NOT_REG){
-				sprintf(output, "\tmov %s, [%s + %ld]", Registers::names[dst], Registers::names[src_reg], offset);
+				sprintf(output, "\t\tmov %s, [%s + %ld]", Registers::names[dst], Registers::names[src_reg], offset);
 			}
 
 			else {
-				sprintf(output, "\tmov %s, [%ld]", Registers::names[dst], offset);
+				sprintf(output, "\t\tmov %s, [%ld]", Registers::names[dst], offset);
 			}
 
 			return output;
@@ -123,11 +123,11 @@ namespace Assembly {
 			static char output[128] = "";
 
 			if (src_reg != Registers::NOT_REG){
-				sprintf(output, "\tmov [%s + %ld], %s", Registers::names[dst], offset, Registers::names[src_reg]);
+				sprintf(output, "\t\tmov [%s + %ld], %s", Registers::names[dst], offset, Registers::names[src_reg]);
 			}
 
 			else {
-				sprintf(output, "\tmov [%ld], %s", offset, Registers::names[src_reg]);
+				sprintf(output, "\t\tmov [%ld], %s", offset, Registers::names[src_reg]);
 			}
 
 			return output;
@@ -150,7 +150,7 @@ namespace Assembly {
 		const char* assembly(){
 
 			static char output[128] = "";
-			sprintf(output, "\tadd %s, %s", Registers::names[dst], Registers::names[src]);
+			sprintf(output, "\t\tadd %s, %s", Registers::names[dst], Registers::names[src]);
 
 			return output;
 		}
@@ -171,11 +171,11 @@ namespace Assembly {
 			static char output[128] = "";
 
 			if (src_reg != Registers::NOT_REG){
-				sprintf(output, "\tadd %s, [%s + %ld]", Registers::names[dst], Registers::names[src_reg], offset);
+				sprintf(output, "\t\tadd %s, [%s + %ld]", Registers::names[dst], Registers::names[src_reg], offset);
 			}
 
 			else {
-				sprintf(output, "\tadd %s, [%ld]", Registers::names[dst], offset);
+				sprintf(output, "\t\tadd %s, [%ld]", Registers::names[dst], offset);
 			}
 
 			return output;
@@ -198,7 +198,7 @@ namespace Assembly {
 		const char* assembly(){
 
 			static char output[128] = "";
-			sprintf(output, "\tsub %s, %s", Registers::names[dst], Registers::names[src]);
+			sprintf(output, "\t\tsub %s, %s", Registers::names[dst], Registers::names[src]);
 
 			return output;
 		}
@@ -215,7 +215,7 @@ namespace Assembly {
 		const char* assembly(){
 
 			static char output[128] = "";
-			sprintf(output, "\tsub %s, %ld", Registers::names[dst], val);
+			sprintf(output, "\t\tsub %s, %ld", Registers::names[dst], val);
 
 			return output;
 		}
@@ -236,7 +236,7 @@ namespace Assembly {
 		const char* assembly(){
 
 			static char output[128] = "";
-			sprintf(output, "\tmul %s, %s", Registers::names[dst], Registers::names[src]);
+			sprintf(output, "\t\tmul %s, %s", Registers::names[dst], Registers::names[src]);
 
 			return output;
 		}
@@ -257,7 +257,7 @@ namespace Assembly {
 		const char* assembly(){
 
 			static char output[128] = "";
-			sprintf(output, "\tdiv %s, %s", Registers::names[dst], Registers::names[src]);
+			sprintf(output, "\t\tdiv %s, %s", Registers::names[dst], Registers::names[src]);
 
 			return output;
 		}
@@ -270,7 +270,7 @@ namespace Assembly {
 	class Ret: public Instruction {
 	public:	
 		const char* assembly(){
-			static char output[128] = "\tret";
+			static char output[128] = "\t\tret";
 			return output;
 		}
 	};
@@ -289,7 +289,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tjmp %s", label); 
+			sprintf(output, "\t\tjmp %s", label); 
 
 			return output;
 		}
@@ -305,7 +305,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tjz %s", label); 
+			sprintf(output, "\t\tjz %s", label); 
 
 			return output;
 		}
@@ -321,7 +321,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tjnz %s", label); 
+			sprintf(output, "\t\tjnz %s", label); 
 
 			return output;
 		}
@@ -337,7 +337,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tjg %s", label); 
+			sprintf(output, "\t\tjg %s", label); 
 
 			return output;
 		}
@@ -353,7 +353,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tjge %s", label); 
+			sprintf(output, "\t\tjge %s", label); 
 
 			return output;
 		}
@@ -369,7 +369,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tjl %s", label); 
+			sprintf(output, "\t\tjl %s", label); 
 
 			return output;
 		}
@@ -385,7 +385,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tjle %s", label); 
+			sprintf(output, "\t\tjle %s", label); 
 
 			return output;
 		}
@@ -404,7 +404,7 @@ namespace Assembly {
 		CmpReg2Reg(Registers::Reg dst, Registers::Reg src): dst(dst), src(src){};
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tcmp %s, %s", Registers::names[dst], Registers::names[src]); 
+			sprintf(output, "\t\tcmp %s, %s", Registers::names[dst], Registers::names[src]); 
 			return output;
 		}
 	};
@@ -422,7 +422,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tpush %s", Registers::names[src]); 
+			sprintf(output, "\t\tpush %s", Registers::names[src]); 
 			return output;
 		}
 	};
@@ -430,7 +430,7 @@ namespace Assembly {
 //===========================================================================//
 //                                POP 
 //===========================================================================//
-//
+
 	class PopReg: public Instruction {
 	private:
 		Registers::Reg dst;
@@ -440,10 +440,14 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\tpop %s", Registers::names[dst]); 
+			sprintf(output, "\t\tpop %s", Registers::names[dst]); 
 			return output;
 		}
 	};
+
+//===========================================================================//
+//                                POP 
+//===========================================================================//
 
 	class Label: public Instruction {
 	private:
@@ -463,6 +467,30 @@ namespace Assembly {
 			
 			else {
 				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+	};
+
+	class Comment: public Instruction {
+	private:
+		const char* text = nullptr; 
+		const int64_t num = -666;
+	
+	public:
+		explicit Comment(const char* text): text(text) {};
+		explicit Comment(int num): num(num) {};
+
+		const char* assembly(){
+
+			static char output[128] = "";
+			if (num == -666){
+				sprintf(output, ";%s", text); 
+			}
+
+			else {
+				sprintf(output, ";.EndBlock%ld", num); 
 			}
 
 			return output;

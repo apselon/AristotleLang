@@ -12,9 +12,11 @@ public:
 	key_t key = {};
 
 	TNode_t() = default;
-	explicit TNode_t(key_t key_, TNode_t* left_ = nullptr, TNode_t* right_ = nullptr, 
-            TNode_t* parent_ = nullptr):
-            key(key_), left_son(left_), right_son(right_), parent_node(parent_){};
+	explicit TNode_t(key_t key_, TNode_t* left_ = nullptr, TNode_t* right_ = nullptr, TNode_t* parent_ = nullptr):
+                     key(key_), left_son(left_), right_son(right_), parent_node(parent_){
+		if (left_son != nullptr) left_son->parent_node = this;
+		if (right_son != nullptr) right_son->parent_node = this;
+			};
 
 	//virtual ~TNode_t(){ this->remove(); };
 	
