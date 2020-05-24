@@ -71,7 +71,7 @@ namespace CodeGeneratorNS {
 		cur_local_vars_num = 0;
 		cur_local_args_num = 0;
 
-		local_offsets = new std::map<const char*, int64_t, cmp_str>();
+		local_offsets = new HashTable<const char*, int64_t, hash, strcmp, 509>();
 
 		instructions.push_back(new Assembly::Label(node->right()->key.lexem));
 		instructions.push_back(new Assembly::Comment("{"));
@@ -106,14 +106,9 @@ namespace CodeGeneratorNS {
 
 		if (node->key.type == TokenizerNS::ID && node->parent()->key.code != Operator::CALL){
 
-			try{
-				instructions.push_back(new Assembly::MovMem2Reg(Assembly::Registers::R10, Assembly::Registers::RBP,
-			                                                local_offsets->at(node->key.lexem)));
+		instructions.push_back(new Assembly::MovMem2Reg(Assembly::Registers::R10, Assembly::Registers::RBP,
+			                                            local_offsets->find(node->key.lexem)->val.second));
 			
-			} catch (...){
-				asm("int $3");
-				std::cout << node->key.lexem << "!!!\n" ;
-			}
 		}
 
 		if (node->key.type == TokenizerNS::OP && node->key.code != Operator::COMMA){
@@ -175,7 +170,7 @@ namespace CodeGeneratorNS {
 
 		if (node->key.code == Operator::DEC_VAR){
 			++num_vars;
-			local_offsets->emplace(node->right()->key.lexem, num_vars * (-8));
+			local_offsets->insert(node->right()->key.lexem, num_vars * (-8));
 		}
 
 		if (node->left() != nullptr){
@@ -194,7 +189,7 @@ namespace CodeGeneratorNS {
 		generate_expression(node->right());
 
 		instructions.push_back(new Assembly::MovReg2Mem(Assembly::Registers::RBP,
-		                       local_offsets->at(node->left()->key.lexem), Assembly::Registers::R10));
+		                       local_offsets->find(node->left()->key.lexem)->val.second, Assembly::Registers::R10));
 
 	}
 
@@ -204,7 +199,7 @@ namespace CodeGeneratorNS {
 
 		if (node->right() != nullptr){
 			++num_args;
-			local_offsets->emplace(node->right()->key.lexem, (num_args + 1) * 8);
+			local_offsets->insert(node->right()->key.lexem, (num_args + 1) * 8);
 
 			if (node->left() != nullptr) count_function_arguments(node->left(), num_args);
 		}
@@ -296,8 +291,8 @@ namespace CodeGeneratorNS {
 	void CodeGenerator::write(FILE* output_f){
 		assert(output_f != nullptr);
 
-		for (auto i = instructions.begin(); i != instructions.end(); ++i){
-			fprintf(output_f, "%s\n", (*i)->assembly());
+		for (size_t i = 0; i < instructions.size(); ++i){
+			fprintf(output_f, "%s\n", instructions[i]->assembly());
 		}
 	}
 

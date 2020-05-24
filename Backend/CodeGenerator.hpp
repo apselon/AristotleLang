@@ -5,7 +5,7 @@
 namespace CodeGeneratorNS {
 	class CodeGenerator {
 	private:
-		std::vector<Assembly::Instruction*> instructions;
+		Vector<Assembly::Instruction*> instructions;
 
 		ASTreeNS::ASTNode_t* cur = nullptr;
 
@@ -22,14 +22,7 @@ namespace CodeGeneratorNS {
 		void generate_exit(ASTreeNS::ASTNode_t* node);
 		void generate_print(ASTreeNS::ASTNode_t* node);
 
-		/*
-		void generate_condition(ASTreeNS::ASTNode_t* node);
-		void generate_sqrt(ASTreeNS::ASTNode_t* node);
-		void generate_input(ASTreeNS::ASTNode_t* node);
-		void generate_nop();
-		*/
-
-		std::map<const char*, int64_t, cmp_str>* local_offsets = nullptr;
+		HashTable<const char*, int64_t, hash, strcmp, 509>* local_offsets = nullptr;
 		size_t cur_local_vars_num = 0;
 		size_t cur_local_args_num = 0;
 
