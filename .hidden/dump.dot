@@ -1,0 +1,235 @@
+digraph List {
+	node [shape="record", fontsize=15] ;
+	rankdir=TB;
+	"0x55a69bf0b720" [label = "{0x55a69bf0b720 |Dichotomy |NOT_OP}"]
+	"0x55a69bf0b6e0" [label = "{0x55a69bf0b6e0 |VARLIST |COMMA}"]
+	"0x55a69bf0b860" [label = "{0x55a69bf0b860 |Dichotomy |NOT_OP}"]
+	"0x55a69bf0b8a0" [label = "{0x55a69bf0b8a0 |1 |NOT_OP}"]
+	"0x55a69bf0b8e0" [label = "{0x55a69bf0b8e0 |more |JA}"]
+	"0x55a69bf0bce0" [label = "{0x55a69bf0bce0 |1 |NOT_OP}"]
+	"0x55a69bf0bd20" [label = "{0x55a69bf0bd20 |RET |RETURN}"]
+	"0x55a69bf0bca0" [label = "{0x55a69bf0bca0 |BLOCK |NOT_OP}"]
+	"0x55a69bf0bba0" [label = "{0x55a69bf0bba0 |Dichotomy |NOT_OP}"]
+	"0x55a69bf0bbe0" [label = "{0x55a69bf0bbe0 |Socrates |NOT_OP}"]
+	"0x55a69bf0bc20" [label = "{0x55a69bf0bc20 |times |MUL}"]
+	"0x55a69bf0bc60" [label = "{0x55a69bf0bc60 |RET |RETURN}"]
+	"0x55a69bf0bb60" [label = "{0x55a69bf0bb60 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b960" [label = "{0x55a69bf0b960 |Socrates |NOT_OP}"]
+	"0x55a69bf0ba20" [label = "{0x55a69bf0ba20 |Dichotomy |NOT_OP}"]
+	"0x55a69bf0ba60" [label = "{0x55a69bf0ba60 |1 |NOT_OP}"]
+	"0x55a69bf0baa0" [label = "{0x55a69bf0baa0 |without |SUB}"]
+	"0x55a69bf0b9e0" [label = "{0x55a69bf0b9e0 |VARLIST |COMMA}"]
+	"0x55a69bf0b9a0" [label = "{0x55a69bf0b9a0 |fact |NOT_OP}"]
+	"0x55a69bf0bae0" [label = "{0x55a69bf0bae0 |CALL |CALL}"]
+	"0x55a69bf0bb20" [label = "{0x55a69bf0bb20 |= |ASSGN}"]
+	"0x55a69bf0b920" [label = "{0x55a69bf0b920 |BLOCK |NOT_OP}"]
+	"0x55a69bf0bd60" [label = "{0x55a69bf0bd60 |CONNECTION |NOT_OP}"]
+	"0x55a69bf0bda0" [label = "{0x55a69bf0bda0 |IF |IF}"]
+	"0x55a69bf0b820" [label = "{0x55a69bf0b820 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b7a0" [label = "{0x55a69bf0b7a0 |Socrates |NOT_OP}"]
+	"0x55a69bf0b7e0" [label = "{0x55a69bf0b7e0 |DEC_VAR |DEC_VAR}"]
+	"0x55a69bf0b760" [label = "{0x55a69bf0b760 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b6a0" [label = "{0x55a69bf0b6a0 |fact |NOT_OP}"]
+	"0x55a69bf0bde0" [label = "{0x55a69bf0bde0 |DEF_FUNC |DEC_FUNC}"]
+	"0x55a69bf0b660" [label = "{0x55a69bf0b660 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b060" [label = "{0x55a69bf0b060 |VARLIST |COMMA}"]
+	"0x55a69bf0b5e0" [label = "{0x55a69bf0b5e0 |EXIT |EXIT}"]
+	"0x55a69bf0b5a0" [label = "{0x55a69bf0b5a0 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b520" [label = "{0x55a69bf0b520 |Aristotle |NOT_OP}"]
+	"0x55a69bf0b560" [label = "{0x55a69bf0b560 |OUT |OUT}"]
+	"0x55a69bf0b4e0" [label = "{0x55a69bf0b4e0 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b360" [label = "{0x55a69bf0b360 |Aristotle |NOT_OP}"]
+	"0x55a69bf0b420" [label = "{0x55a69bf0b420 |Plato |NOT_OP}"]
+	"0x55a69bf0b3e0" [label = "{0x55a69bf0b3e0 |VARLIST |COMMA}"]
+	"0x55a69bf0b3a0" [label = "{0x55a69bf0b3a0 |fact |NOT_OP}"]
+	"0x55a69bf0b460" [label = "{0x55a69bf0b460 |CALL |CALL}"]
+	"0x55a69bf0b4a0" [label = "{0x55a69bf0b4a0 |= |ASSGN}"]
+	"0x55a69bf0b320" [label = "{0x55a69bf0b320 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b260" [label = "{0x55a69bf0b260 |Plato |NOT_OP}"]
+	"0x55a69bf0b2a0" [label = "{0x55a69bf0b2a0 |5 |NOT_OP}"]
+	"0x55a69bf0b2e0" [label = "{0x55a69bf0b2e0 |= |ASSGN}"]
+	"0x55a69bf0b220" [label = "{0x55a69bf0b220 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b1a0" [label = "{0x55a69bf0b1a0 |Aristotle |NOT_OP}"]
+	"0x55a69bf0b1e0" [label = "{0x55a69bf0b1e0 |DEC_VAR |DEC_VAR}"]
+	"0x55a69bf0b160" [label = "{0x55a69bf0b160 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b0e0" [label = "{0x55a69bf0b0e0 |Plato |NOT_OP}"]
+	"0x55a69bf0b120" [label = "{0x55a69bf0b120 |DEC_VAR |DEC_VAR}"]
+	"0x55a69bf0b0a0" [label = "{0x55a69bf0b0a0 |BLOCK |NOT_OP}"]
+	"0x55a69bf0b020" [label = "{0x55a69bf0b020 |_start |NOT_OP}"]
+	"0x55a69bf0b620" [label = "{0x55a69bf0b620 |DEF_FUNC |DEC_FUNC}"]
+	"0x55a69bf0afe0" [label = "{0x55a69bf0afe0 |BLOCK |NOT_OP}"]
+	"0x55a69bf0afa0" [label = "{0x55a69bf0afa0 |;_START |NOT_OP}"]
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0afa0" -> "0x55a69bf0afe0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0afe0" -> "0x55a69bf0b660";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b660" -> "0x55a69bf0bde0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0bde0" -> "0x55a69bf0b6e0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b6e0" -> "0x55a69bf0b720";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bde0" -> "0x55a69bf0b6a0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b6a0" -> "0x55a69bf0b760";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b760" -> "0x55a69bf0b820";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b820" -> "0x55a69bf0bda0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0bda0" -> "0x55a69bf0b8e0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b8e0" -> "0x55a69bf0b860";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b8e0" -> "0x55a69bf0b8a0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bda0" -> "0x55a69bf0bd60";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0bd60" -> "0x55a69bf0bca0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bca0" -> "0x55a69bf0bd20";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bd20" -> "0x55a69bf0bce0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bd60" -> "0x55a69bf0b920";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b920" -> "0x55a69bf0bb60";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bb60" -> "0x55a69bf0bc60";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bc60" -> "0x55a69bf0bc20";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0bc20" -> "0x55a69bf0bba0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bc20" -> "0x55a69bf0bbe0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b920" -> "0x55a69bf0bb20";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0bb20" -> "0x55a69bf0b960";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bb20" -> "0x55a69bf0bae0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0bae0" -> "0x55a69bf0b9e0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b9e0" -> "0x55a69bf0baa0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0baa0" -> "0x55a69bf0ba20";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0baa0" -> "0x55a69bf0ba60";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0bae0" -> "0x55a69bf0b9a0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b760" -> "0x55a69bf0b7e0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b7e0" -> "0x55a69bf0b7a0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0afe0" -> "0x55a69bf0b620";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b620" -> "0x55a69bf0b060";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b620" -> "0x55a69bf0b020";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b020" -> "0x55a69bf0b0a0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b0a0" -> "0x55a69bf0b160";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b160" -> "0x55a69bf0b220";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b220" -> "0x55a69bf0b320";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b320" -> "0x55a69bf0b4e0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b4e0" -> "0x55a69bf0b5a0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b5a0" -> "0x55a69bf0b5e0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b4e0" -> "0x55a69bf0b560";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b560" -> "0x55a69bf0b520";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b320" -> "0x55a69bf0b4a0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b4a0" -> "0x55a69bf0b360";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b4a0" -> "0x55a69bf0b460";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b460" -> "0x55a69bf0b3e0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b3e0" -> "0x55a69bf0b420";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b460" -> "0x55a69bf0b3a0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b220" -> "0x55a69bf0b2e0";
+	edge [color = "#19A302"] ;
+	"0x55a69bf0b2e0" -> "0x55a69bf0b260";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b2e0" -> "0x55a69bf0b2a0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b160" -> "0x55a69bf0b1e0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b1e0" -> "0x55a69bf0b1a0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b0a0" -> "0x55a69bf0b120";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+	"0x55a69bf0b120" -> "0x55a69bf0b0e0";
+	edge [color = "#19A302"] ;
+	edge [color = "#C00303"] ;
+}

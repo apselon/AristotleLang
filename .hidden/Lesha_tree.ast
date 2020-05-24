@@ -1,0 +1,1 @@
+{ PROGRAM_ROOT { @ } { DECLARATION { @ } { FUNCTION { VARLIST { VARLIST { @ } { b } } { a } } { sum { @ } { BLOCK { @ } { OP { OP { OP { @ } { RETURN { @ } { c } } } { ASSIGN { c } { MUL { a } { b } } } } { INITIALIZE { @ } { c } } } } } } } } 
