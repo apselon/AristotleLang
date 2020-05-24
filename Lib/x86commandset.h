@@ -183,6 +183,24 @@ namespace Assembly {
 
 	};
 
+	class AddVal2Reg: public Instruction {
+	private:
+		Registers::Reg dst;
+		int64_t src = 0;
+
+	public:	
+		AddVal2Reg(Registers::Reg dst, int64_t src): dst(dst), src(src) {};
+
+		const char* assembly(){
+
+			static char output[128] = "";
+			sprintf(output, "\t\tadd %s, %ld", Registers::names[dst], src); 
+
+			return output;
+		}
+	};
+
+
 //===========================================================================//
 //                                    SUB
 //===========================================================================//
@@ -391,6 +409,22 @@ namespace Assembly {
 		}
 	};
 
+	class Call: public Instruction {
+	private:
+		int64_t offset = 0;
+		const char* label;
+
+	public:	
+		Call(const char* label): label(label) {};
+
+		const char* assembly(){
+			static char output[128] = "";
+			sprintf(output, "\t\tcall %s", label); 
+
+			return output;
+		}
+	};
+
 //===========================================================================//
 //                                  CMP
 //===========================================================================//
@@ -466,7 +500,7 @@ namespace Assembly {
 			}
 			
 			else {
-				sprintf(output, ".Block%ld", num); 
+				sprintf(output, ".Block%ld:", num); 
 			}
 
 			return output;

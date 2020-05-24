@@ -15,13 +15,12 @@ namespace CodeGeneratorNS {
 		//	generate_branching(node);
 			break;
 		case Operator::DEC_VAR:
-//			generate_var_declaration(node);
 			break;
 		case Operator::ASSGN:
 			generate_var_init(node);
 			break;
 		case Operator::RETURN:
-		//	generate_return(node);
+			generate_return(node);
 			break;
 		case Operator::DEC_FUNC:
 			generate_func_declaration(node);
@@ -80,10 +79,6 @@ namespace CodeGeneratorNS {
 
 		generate_block(node->right()->right());
 
-		instructions.push_back(new Assembly::SubReg2Val(Assembly::Registers::RSP, cur_local_vars_num * 8));
-		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RSP, Assembly::Registers::RBP));
-		instructions.push_back(new Assembly::PopReg(Assembly::Registers::RBP));
-		instructions.push_back(new Assembly::Ret());
 		instructions.push_back(new Assembly::Comment("}"));
 	}
 
@@ -108,13 +103,15 @@ namespace CodeGeneratorNS {
 		if (node->key.type == TokenizerNS::ID){
 			auto name = local_offsets->find(node->key.lexem);
 
-			//if (name != local_offsets->end())
+			if (name != local_offsets->end())
 				instructions.push_back(new Assembly::MovMem2Reg(Assembly::Registers::R10, Assembly::Registers::RBP,
 			                                                    local_offsets->at(node->key.lexem)));
 			
 		}
 
 		if (node->key.type == TokenizerNS::OP && node->key.code != Operator::COMMA){
+			size_t cur_num_args = 0;
+
 			switch (node->key.code){
 				case Operator::ADD:
 					instructions.push_back(new Assembly::AddReg2Reg(Assembly::Registers::R10,
@@ -135,11 +132,33 @@ namespace CodeGeneratorNS {
 					instructions.push_back(new Assembly::DivReg2Reg(Assembly::Registers::R10,
 					                                                Assembly::Registers::R11));
 					break;
+
+				case Operator::CALL:
+					push_arguments(node->left(), cur_num_args);
+					instructions.push_back(new Assembly::Call(node->right()->key.lexem));
+					instructions.push_back(new Assembly::AddVal2Reg(Assembly::Registers::RSP, cur_num_args * 8));
+					break;
 				
 				default:
 					assert("Unknown operator code" && false);
 			}
 		}
+	}
+
+	void CodeGenerator::push_arguments(ASTreeNS::ASTNode_t* node, size_t& num_args){
+		assert(node != nullptr);
+		assert(node->key.code == Operator::COMMA);
+		
+		if (node->right() != nullptr){
+			++num_args;
+			generate_expression(node->right());
+			instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
+
+			if (node->left() != nullptr){
+				push_arguments(node->left(), num_args);
+			}
+		}
+
 	}
 
 	void CodeGenerator::count_local_vars(ASTreeNS::ASTNode_t* node, size_t& num_vars){
@@ -184,6 +203,15 @@ namespace CodeGeneratorNS {
 
 			if (node->left() != nullptr) count_function_arguments(node->left(), num_args);
 		}
+	}
+
+	void CodeGenerator::generate_return(ASTreeNS::ASTNode_t* node){
+		generate_expression(node->right());
+
+		instructions.push_back(new Assembly::SubReg2Val(Assembly::Registers::RSP, cur_local_vars_num * 8));
+		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RSP, Assembly::Registers::RBP));
+		instructions.push_back(new Assembly::PopReg(Assembly::Registers::RBP));
+		instructions.push_back(new Assembly::Ret());
 	}
 
 	void CodeGenerator::write(FILE* output_f){
