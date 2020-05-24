@@ -15,7 +15,10 @@ namespace Assembly {
 			RDI,
 			R10,
 			R11,
-			R12
+			R12,
+			R13,
+			R14,
+			R15
 		};
 	
 		const char* names[] = {
@@ -29,7 +32,10 @@ namespace Assembly {
 			"rdi",
 			"r10",
 			"r11",
-			"r12"
+			"r12",
+			"r13",
+			"r14",
+			"r15"
 		};
 
 		const char codes[] = {
@@ -254,7 +260,7 @@ namespace Assembly {
 		const char* assembly(){
 
 			static char output[128] = "";
-			sprintf(output, "\t\tmul %s, %s", Registers::names[dst], Registers::names[src]);
+			sprintf(output, "\t\timul %s, %s", Registers::names[dst], Registers::names[src]);
 
 			return output;
 		}
@@ -300,14 +306,22 @@ namespace Assembly {
 	class Jmp: public Instruction {
 	private:
 		int64_t offset = 0;
+		int64_t num = -666;
 		const char* label;
 
 	public:	
 		Jmp(const char* label): label(label) {};
+		Jmp(int64_t num): num(num) {};
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\t\tjmp %s", label); 
+			if (num == -666){
+				sprintf(output, "\t\tjmp %s", label); 
+			}
+
+			else {
+				sprintf(output, "\t\tjmp .Block%ld", num); 
+			}
 
 			return output;
 		}
@@ -316,14 +330,22 @@ namespace Assembly {
 	class Jz: public Instruction {
 	private:
 		int64_t offset = 0;
+		int64_t num = -666;
 		const char* label;
 
 	public:	
 		Jz(const char* label): label(label) {};
+		Jz(int64_t num): num(num) {};
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\t\tjz %s", label); 
+			if (num == -666){
+				sprintf(output, "\t\tjz %s", label); 
+			}
+			
+			else {
+				sprintf(output, "\t\tjz .Block%ld", num); 
+			}
 
 			return output;
 		}
@@ -332,14 +354,22 @@ namespace Assembly {
 	class Jnz: public Instruction {
 	private:
 		int64_t offset = 0;
+		int64_t num = -666;
 		const char* label;
 
 	public:	
 		Jnz(const char* label): label(label) {};
+		Jnz(int64_t num): num(num) {};
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\t\tjnz %s", label); 
+			if (num == -666){
+				sprintf(output, "\t\tjnz %s", label); 
+			}
+
+			else {
+				sprintf(output, "\t\tjnz .Block%ld", num); 
+			}
 
 			return output;
 		}
@@ -348,14 +378,22 @@ namespace Assembly {
 	class Jg: public Instruction {
 	private:
 		int64_t offset = 0;
-		const char* label;
+		int64_t num = -666;
+		const char* label = nullptr;
 
 	public:	
 		Jg(const char* label): label(label) {};
+		Jg(int64_t num): num(num) {};
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\t\tjg %s", label); 
+			if (num == -666){
+				sprintf(output, "\t\tjg %s", label); 
+			}
+
+			else {
+				sprintf(output, "\t\tjg .Block%ld", num); 
+			}
 
 			return output;
 		}
@@ -364,30 +402,47 @@ namespace Assembly {
 	class Jge: public Instruction {
 	private:
 		int64_t offset = 0;
+		int64_t num = -666;
 		const char* label;
 
 	public:	
 		Jge(const char* label): label(label) {};
+		Jge(int64_t num): num(num) {};
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\t\tjge %s", label); 
+			if (num == -666){
+				sprintf(output, "\t\tjge %s", label); 
+			}
+
+			else {
+				sprintf(output, "\t\tjge .Block%ld", num); 
+			}
 
 			return output;
 		}
 	};
 
+
 	class Jl: public Instruction {
 	private:
 		int64_t offset = 0;
+		int64_t num = -666;
 		const char* label;
 
 	public:	
 		Jl(const char* label): label(label) {};
+		Jl(int64_t num): num(num) {};
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\t\tjl %s", label); 
+			if (num == -666){
+				sprintf(output, "\t\tjl %s", label); 
+			}
+
+			else {
+				sprintf(output, "\t\tjl .Block%ld", num); 
+			}
 
 			return output;
 		}
@@ -396,14 +451,22 @@ namespace Assembly {
 	class Jle: public Instruction {
 	private:
 		int64_t offset = 0;
+		int64_t num = -666;
 		const char* label;
 
 	public:	
 		Jle(const char* label): label(label) {};
+		Jle(int64_t num): num(num) {};
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\t\tjle %s", label); 
+			if (num == -666){
+				sprintf(output, "\t\tjle %s", label); 
+			}
+
+			else {
+				sprintf(output, "\t\tjle .Block%ld", num); 
+			}
 
 			return output;
 		}
@@ -529,5 +592,45 @@ namespace Assembly {
 
 			return output;
 		}
+	};
+
+	class Syscall: public Instruction {
+	public:	
+		Syscall(){};
+		const char* assembly(){
+			static char output[128] = "\t\tsyscall";
+			return output;
+		}
+	};
+
+	class Section: public Instruction {
+	private:
+		const char* name;
+	
+	public:
+		Section(const char* name): name(name) {};
+		
+		const char* assembly(){
+			static char output[128] = "";
+			sprintf(output, "section %s", name);
+			
+			return output;
+		}
+	};
+
+	class Global: public Instruction {
+	private:
+		const char* name;
+	
+	public:
+		Global(const char* name): name(name) {};
+		
+		const char* assembly(){
+			static char output[128] = "";
+			sprintf(output, "\t\tglobal %s", name);
+			
+			return output;
+		}
+
 	};
 }

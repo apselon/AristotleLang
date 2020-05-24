@@ -3,6 +3,8 @@
 namespace CodeGeneratorNS {
 	CodeGenerator::CodeGenerator(const ASTreeNS::ASTree& tree){
 		cur	= tree.root();
+		instructions.push_back(new Assembly::Section(".text"));
+		instructions.push_back(new Assembly::Global("_start"));
 		generate_block(cur->right());
 		
 	}
@@ -12,7 +14,7 @@ namespace CodeGeneratorNS {
 
 		switch (node->key.code){
 		case Operator::IF:
-		//	generate_branching(node);
+			generate_branching(node);
 			break;
 		case Operator::DEC_VAR:
 			break;
@@ -29,7 +31,7 @@ namespace CodeGeneratorNS {
 		//	generate_print(node);
 			break;
 		case Operator::EXIT:
-		//	generate_exit(node);
+			generate_exit(node);
 			break;
 		case Operator::READ:
 		//	generate_input(node);
@@ -85,13 +87,13 @@ namespace CodeGeneratorNS {
 	void CodeGenerator::generate_expression(ASTreeNS::ASTNode_t* node){
 		assert(node != nullptr);
 
-		if (node->left () != nullptr){
-			generate_expression(node->left ());
+		if (node->right() != nullptr){
+			generate_expression(node->right());
 		}
 
-		if (node->right() != nullptr){
+		if (node->left() != nullptr){
 			instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
-			generate_expression(node->right());
+			generate_expression(node->left());
 			instructions.push_back(new Assembly::PopReg(Assembly::Registers::R11));
 		}
 
@@ -121,9 +123,11 @@ namespace CodeGeneratorNS {
 				case Operator::SUB:
 					instructions.push_back(new Assembly::SubReg2Reg(Assembly::Registers::R10,
 					                                                Assembly::Registers::R11));
+
 					break;
 
 				case Operator::MUL:
+
 					instructions.push_back(new Assembly::MulReg2Reg(Assembly::Registers::R10,
 					                                                Assembly::Registers::R11));
 					break;
@@ -212,6 +216,70 @@ namespace CodeGeneratorNS {
 		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RSP, Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::PopReg(Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::Ret());
+	}
+
+	void CodeGenerator::generate_branching(ASTreeNS::ASTNode_t* node){
+		assert(node != nullptr);
+		assert(node->key.code == Operator::IF);
+
+		instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
+
+		generate_expression(node->left()->left());
+		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::R12, Assembly::Registers::R10));
+
+		generate_expression(node->left()->right());
+		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::R13, Assembly::Registers::R10));
+
+		instructions.push_back(new Assembly::PopReg(Assembly::Registers::R10));
+
+		instructions.push_back(new Assembly::CmpReg2Reg(Assembly::Registers::R12, Assembly::Registers::R13));
+
+		switch (node->left()->key.code){
+			case Operator::EQL:
+				instructions.push_back(new Assembly::Jz(num_blocks));
+				instructions.push_back(new Assembly::Jmp(num_blocks + 1));
+				break;
+
+			case Operator::NEQL:
+				instructions.push_back(new Assembly::Jnz(num_blocks));
+				instructions.push_back(new Assembly::Jmp(num_blocks + 1));
+				break;
+
+			case Operator::EQLESS:
+				instructions.push_back(new Assembly::Jle(num_blocks));
+				instructions.push_back(new Assembly::Jmp(num_blocks + 1));
+				break;
+
+			case Operator::EQMORE:
+				instructions.push_back(new Assembly::Jge(num_blocks));
+				instructions.push_back(new Assembly::Jmp(num_blocks + 1));
+				break;
+
+			case Operator::LESS:
+				instructions.push_back(new Assembly::Jl(num_blocks));
+				instructions.push_back(new Assembly::Jmp(num_blocks + 1));
+				break;
+
+			case Operator::MORE:
+				instructions.push_back(new Assembly::Jg(num_blocks));
+				instructions.push_back(new Assembly::Jmp(num_blocks + 1));
+				break;
+
+			default:
+				assert("Wrong branching format" && false);
+		}
+
+		generate_block(node->right()->right());
+		generate_block(node->right()->left ());
+	}
+
+	void CodeGenerator::generate_exit(ASTreeNS::ASTNode_t* node){
+		assert(node != nullptr);
+		assert(node->key.code == Operator::EXIT);
+
+		instructions.push_back(new Assembly::MovVal2Reg(Assembly::Registers::RAX, 60));
+		instructions.push_back(new Assembly::MovVal2Reg(Assembly::Registers::RDI, 0));
+		instructions.push_back(new Assembly::Syscall());
 	}
 
 	void CodeGenerator::write(FILE* output_f){
