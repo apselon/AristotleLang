@@ -78,8 +78,10 @@ namespace CodeGeneratorNS {
 		instructions.push_back(new Assembly::PushReg(Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RBP, Assembly::Registers::RSP));
 
-		count_local_vars(node->right(), cur_local_vars_num);
+		count_local_offsets(node->right(), cur_local_vars_num);
 		count_function_arguments(node->left(), cur_local_args_num);
+
+		instructions.push_back(new Assembly::SubReg2Val(Assembly::Registers::RSP, cur_local_vars_num * 8));
 
 		generate_block(node->right()->right());
 
@@ -88,15 +90,23 @@ namespace CodeGeneratorNS {
 
 	void CodeGenerator::generate_expression(ASTreeNS::ASTNode_t* node){
 		assert(node != nullptr);
+		
+		if (node->key.code == Operator::CALL){
+			size_t cur_num_args = 0;
+
+			push_arguments(node->left(), cur_num_args);
+			instructions.push_back(new Assembly::Call(node->right()->key.lexem));
+			instructions.push_back(new Assembly::AddVal2Reg(Assembly::Registers::RSP, (cur_num_args + 1) * 8));
+			return;
+		}
 
 		if (node->right() != nullptr){
 			generate_expression(node->right());
 		}
 
 		if (node->left() != nullptr){
-			instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
+			instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::R11, Assembly::Registers::R10));
 			generate_expression(node->left());
-			instructions.push_back(new Assembly::PopReg(Assembly::Registers::R11));
 		}
 
 		if (node->key.type == TokenizerNS::NUM){
@@ -112,7 +122,6 @@ namespace CodeGeneratorNS {
 		}
 
 		if (node->key.type == TokenizerNS::OP && node->key.code != Operator::COMMA){
-			size_t cur_num_args = 0;
 
 			switch (node->key.code){
 				case Operator::ADD:
@@ -137,12 +146,6 @@ namespace CodeGeneratorNS {
 					                                                Assembly::Registers::R11));
 					break;
 
-				case Operator::CALL:
-					push_arguments(node->left(), cur_num_args);
-					instructions.push_back(new Assembly::Call(node->right()->key.lexem));
-					instructions.push_back(new Assembly::AddVal2Reg(Assembly::Registers::RSP, cur_num_args * 8));
-					break;
-				
 				default:
 					assert("Unknown operator code" && false);
 			}
@@ -154,18 +157,19 @@ namespace CodeGeneratorNS {
 		assert(node->key.code == Operator::COMMA);
 		
 		if (node->right() != nullptr){
-			++num_args;
-			generate_expression(node->right());
-			instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
+				++num_args;
 
 			if (node->left() != nullptr){
 				push_arguments(node->left(), num_args);
 			}
+
+			generate_expression(node->right());
+			instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
 		}
 
 	}
 
-	void CodeGenerator::count_local_vars(ASTreeNS::ASTNode_t* node, size_t& num_vars){
+	void CodeGenerator::count_local_offsets(ASTreeNS::ASTNode_t* node, size_t& num_vars){
 		assert(node != nullptr);
 
 		if (node->key.code == Operator::DEC_VAR){
@@ -174,11 +178,11 @@ namespace CodeGeneratorNS {
 		}
 
 		if (node->left() != nullptr){
-			count_local_vars(node->left(), num_vars);
+			count_local_offsets(node->left(), num_vars);
 		}
 
 		if (node->right() != nullptr){
-			count_local_vars(node->right(), num_vars);
+			count_local_offsets(node->right(), num_vars);
 		}
 	}
 
@@ -206,9 +210,11 @@ namespace CodeGeneratorNS {
 	}
 
 	void CodeGenerator::generate_return(ASTreeNS::ASTNode_t* node){
+		assert(node != nullptr);
+		assert(node->key.code == Operator::RETURN);
+
 		generate_expression(node->right());
 
-		instructions.push_back(new Assembly::SubReg2Val(Assembly::Registers::RSP, cur_local_vars_num * 8));
 		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RSP, Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::PopReg(Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::Ret());
@@ -218,17 +224,12 @@ namespace CodeGeneratorNS {
 		assert(node != nullptr);
 		assert(node->key.code == Operator::IF);
 
-		//instructions.push_back(new Assembly::PushReg(Assembly::Registers::R10));
-
 		generate_expression(node->left()->left());
-		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::R12, Assembly::Registers::R10));
+		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::R11, Assembly::Registers::R10));
 
 		generate_expression(node->left()->right());
-		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::R13, Assembly::Registers::R10));
 
-		//instructions.push_back(new Assembly::PopReg(Assembly::Registers::R10));
-
-		instructions.push_back(new Assembly::CmpReg2Reg(Assembly::Registers::R12, Assembly::Registers::R13));
+		instructions.push_back(new Assembly::CmpReg2Reg(Assembly::Registers::R11, Assembly::Registers::R10));
 
 		switch (node->left()->key.code){
 			case Operator::EQL:

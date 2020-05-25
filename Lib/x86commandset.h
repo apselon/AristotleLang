@@ -1,6 +1,7 @@
 #include "CompLib.hpp"
 
 namespace Assembly {
+	const int UNUSED = -1;
 
 	namespace Registers {
 		enum Reg {
@@ -92,7 +93,7 @@ namespace Assembly {
 		Registers::Reg src_reg = Registers::NOT_REG;
 		const char* src_label = nullptr;
 		Registers::Reg dst;
-		int64_t offset = -666;
+		int64_t offset = UNUSED;
 
 	public:
 		MovMem2Reg(Registers::Reg dst, Registers::Reg src_reg, int64_t offset): src_reg(src_reg), dst(dst), offset(offset) {}
@@ -108,7 +109,7 @@ namespace Assembly {
 				sprintf(output, "\t\tmov %s, [%s + %ld]", Registers::names[dst], Registers::names[src_reg], offset);
 			}
 
-			else if (offset != -666) {
+			else if (offset != UNUSED) {
 				sprintf(output, "\t\tmov %s, [%ld]", Registers::names[dst], offset);
 			}
 
@@ -313,7 +314,7 @@ namespace Assembly {
 	class Jmp: public Instruction {
 	private:
 		int64_t offset = 0;
-		int64_t num = -666;
+		int64_t num = UNUSED;
 		const char* label;
 
 	public:	
@@ -322,7 +323,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			if (num == -666){
+			if (num == UNUSED){
 				sprintf(output, "\t\tjmp %s", label); 
 			}
 
@@ -337,7 +338,7 @@ namespace Assembly {
 	class Jz: public Instruction {
 	private:
 		int64_t offset = 0;
-		int64_t num = -666;
+		int64_t num = UNUSED;
 		const char* label;
 
 	public:	
@@ -346,7 +347,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			if (num == -666){
+			if (num == UNUSED){
 				sprintf(output, "\t\tjz %s", label); 
 			}
 			
@@ -361,7 +362,7 @@ namespace Assembly {
 	class Jnz: public Instruction {
 	private:
 		int64_t offset = 0;
-		int64_t num = -666;
+		int64_t num = UNUSED;
 		const char* label;
 
 	public:	
@@ -370,7 +371,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			if (num == -666){
+			if (num == UNUSED){
 				sprintf(output, "\t\tjnz %s", label); 
 			}
 
@@ -385,7 +386,7 @@ namespace Assembly {
 	class Jg: public Instruction {
 	private:
 		int64_t offset = 0;
-		int64_t num = -666;
+		int64_t num = UNUSED;
 		const char* label = nullptr;
 
 	public:	
@@ -394,7 +395,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			if (num == -666){
+			if (num == UNUSED){
 				sprintf(output, "\t\tjg %s", label); 
 			}
 
@@ -409,7 +410,7 @@ namespace Assembly {
 	class Jge: public Instruction {
 	private:
 		int64_t offset = 0;
-		int64_t num = -666;
+		int64_t num = UNUSED;
 		const char* label;
 
 	public:	
@@ -418,7 +419,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			if (num == -666){
+			if (num == UNUSED){
 				sprintf(output, "\t\tjge %s", label); 
 			}
 
@@ -434,7 +435,7 @@ namespace Assembly {
 	class Jl: public Instruction {
 	private:
 		int64_t offset = 0;
-		int64_t num = -666;
+		int64_t num = UNUSED;
 		const char* label;
 
 	public:	
@@ -443,7 +444,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			if (num == -666){
+			if (num == UNUSED){
 				sprintf(output, "\t\tjl %s", label); 
 			}
 
@@ -458,7 +459,7 @@ namespace Assembly {
 	class Jle: public Instruction {
 	private:
 		int64_t offset = 0;
-		int64_t num = -666;
+		int64_t num = UNUSED;
 		const char* label;
 
 	public:	
@@ -467,7 +468,7 @@ namespace Assembly {
 
 		const char* assembly(){
 			static char output[128] = "";
-			if (num == -666){
+			if (num == UNUSED){
 				sprintf(output, "\t\tjle %s", label); 
 			}
 
@@ -596,7 +597,7 @@ namespace Assembly {
 	class Comment: public Instruction {
 	private:
 		const char* text = nullptr; 
-		const int64_t num = -666;
+		const int64_t num = UNUSED;
 	
 	public:
 		explicit Comment(const char* text): text(text) {};
@@ -605,7 +606,7 @@ namespace Assembly {
 		const char* assembly(){
 
 			static char output[128] = "";
-			if (num == -666){
+			if (num == UNUSED){
 				sprintf(output, ";%s", text); 
 			}
 

@@ -28,7 +28,7 @@ namespace CodeGeneratorNS {
 
 		size_t num_blocks = 0;
 
-		void count_local_vars(ASTreeNS::ASTNode_t* node, size_t& num_vars);
+		void count_local_offsets(ASTreeNS::ASTNode_t* node, size_t& num_vars);
 		void count_function_arguments(ASTreeNS::ASTNode_t* node, size_t& num_args);
 
 	public:
