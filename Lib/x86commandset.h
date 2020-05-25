@@ -1,3 +1,4 @@
+#pragma once
 #include "CompLib.hpp"
 
 namespace Assembly {
@@ -674,3 +675,224 @@ namespace Assembly {
 
 	};
 }
+
+namespace Binary {
+
+	namespace Registers {
+		enum Reg32 {
+			RAX = 0,
+			RCX = 1,
+			RDX = 2,
+			RBX = 3,
+			RBP = 4,
+			RSP = 5,
+			RSI = 6,
+			RDI = 7,
+		};
+
+		enum Reg64 {
+			R10 = 1,
+			R11 = 2,
+			R12 = 3,
+			R13 = 4,
+			R14 = 5,
+			R15 = 6
+		};
+	};
+
+	namespace Prefix {
+		namespace REX {
+			constexpr uint8_t O   = 0x40;
+			constexpr uint8_t B   = 0x41;
+			constexpr uint8_t W   = 0x48;
+			constexpr uint8_t WB  = 0x49;
+			constexpr uint8_t WR  = 0x4C;
+			constexpr uint8_t WRB = 0x4D;
+		}
+	}
+
+	namespace Jump {
+		namespace Near {
+			enum {
+				CALL = 0xE8,
+				JMP  = 0xE9,
+				RET  = 0xC3,
+				JA   = 0x87,
+				JAE  = 0x83,
+				JB   = 0x82,
+				JBE  = 0x86,
+				JE   = 0x84,
+				JNE  = 0x85,
+				
+				JG   = 0x8F,
+				JGE  = 0x8D,
+				JL   = 0x8C,
+				JLE  = 0x8E,
+			};
+		}
+	}
+
+	namespace Push {
+		enum {
+			REG = 0x50,
+			NUM = 0x68,
+		};
+	}
+
+	namespace Pop {
+		enum {
+			REG = 0x58,
+		};
+	}
+
+	namespace Mov2Reg {
+		enum {
+			NUM = 0xB8,
+			REG = 0x89
+		};
+	};
+
+	namespace Cmp {
+		enum {
+			REG = 0x39
+		};
+	}
+
+	namespace Op {
+		enum {
+			ADD  = 0x01,
+			SUB  = 0x29,
+			IMUL = 0xAF,
+		};
+	}
+
+	uint8_t* AddR10R11(uint8_t* array){
+
+		uint8_t code[] = {Prefix::REX::WRB, Op::ADD, 0xDA};
+
+		memcpy(array, code, sizeof(code));	
+		return array + sizeof(code);
+	}
+
+	uint8_t* SubR10R11(uint8_t* array){
+
+		uint8_t code[] = {Prefix::REX::WRB, Op::SUB, 0xDA};
+
+		memcpy(array, code, sizeof(code));	
+		return array + sizeof(code);
+	}
+
+	uint8_t* ImulR10R11(uint8_t* array){
+
+		uint8_t code[] = {0x48, 0x0F, 0xAF, 0xD3};
+
+		memcpy(array, code, sizeof(code));	
+		return array + sizeof(code);
+	}
+
+	uint8_t* PushR10(uint8_t* array){
+
+		uint8_t code[] = {0x41, 0x52};
+
+		memcpy(array, code, sizeof(code));	
+		return array + sizeof(code);
+	}
+
+	uint8_t* PushRBP(uint8_t* array){
+
+		uint8_t code[] = {0x55};
+
+		memcpy(array, code, sizeof(code));	
+		return array + sizeof(code);
+	}
+
+	uint8_t* PopRBP(uint8_t* array){
+
+		uint8_t code[] = {0x5d};
+
+		memcpy(array, code, sizeof(code));	
+		return array + sizeof(code);
+	}
+
+	uint8_t* MovRSP2RBP(uint8_t* array){
+
+		uint8_t code[] = {0x48, 0x89, 0xE5};
+
+		memcpy(array, code, sizeof(code));	
+		return array + sizeof(code);
+	}
+
+	uint8_t* MovRBPtoRSP(uint8_t* array){
+
+		uint8_t code[] = {0x48, 0x89, 0xEC};
+
+		memcpy(array, code, sizeof(code));	
+		return array + sizeof(code);
+	}
+
+	uint8_t* MovNum2R10(uint32_t num, uint8_t* array){
+		uint8_t code[] = {0x48, 0xC7, 0xC2};
+		uint8_t* num_code = reinterpret_cast<uint8_t*>(&num);
+
+		memcpy(array, code, sizeof(code));	
+		array += sizeof(code);
+		memcpy(array, num_code, 4);	
+		return array + 4;
+	}
+
+	uint8_t* MovR102Mem(uint32_t offset, uint8_t* array){
+		uint8_t code[] = {0x4C, 0x89, 0x95};
+		uint8_t* offset_code = reinterpret_cast<uint8_t*>(&offset);
+
+		memcpy(array, code, sizeof(code));	
+		array += sizeof(code);
+		memcpy(array, offset_code, 4);	
+		return array + 4;
+	}
+
+	uint8_t* MovMem2R10(uint32_t offset, uint8_t* array){
+		uint8_t code[] = {0x48, 0x8B, 0x95};
+		uint8_t* offset_code = reinterpret_cast<uint8_t*>(&offset);
+
+		memcpy(array, code, sizeof(code));	
+		array += sizeof(code);
+		memcpy(array, offset_code, 4);	
+		return array + 4;
+	}
+
+	uint8_t* AddRSPNum(uint32_t num, uint8_t* array){
+		uint8_t code[] = {0x48, 0x81, 0xC4};
+		uint8_t* num_code = reinterpret_cast<uint8_t*>(&num);
+
+		memcpy(array, code, sizeof(code));	
+		array += sizeof(code);
+		memcpy(array, num_code, 4);	
+		return array + 4;
+	}
+	
+	uint8_t* SubRSPNum(uint32_t num, uint8_t* array){
+		uint8_t code[] = {0x48, 0x81, 0xEC};
+		uint8_t* num_code = reinterpret_cast<uint8_t*>(&num);
+
+		memcpy(array, code, sizeof(code));	
+		array += sizeof(code);
+		memcpy(array, num_code, 4);	
+		return array + 4;
+	}
+
+	uint8_t* MovR10toR11(uint8_t* array){
+		uint8_t code[] = {0x4D, 0x89, 0xD3};
+
+		memcpy(array, code, sizeof(code));	
+		array += sizeof(code);
+		return array;
+	}
+
+	uint8_t* Ret(uint8_t* array){
+		uint8_t code[] = {0xC3};
+
+		memcpy(array, code, sizeof(code));	
+		array += sizeof(code);
+		return array;
+	}
+};

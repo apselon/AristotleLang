@@ -4,6 +4,7 @@
 #include <cctype>
 #include <cstring>
 #include <cassert>
+#include <cstdint>
 
 #include "DSL.h"
 #include "x86commandset.h"
