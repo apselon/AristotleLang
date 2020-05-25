@@ -105,6 +105,24 @@ namespace Assembly {
 			};
 		}
 
+		namespace JMP {
+			enum {
+				CALL = 0xE8,
+				JMP  = 0xE9,
+				RET  = 0xC3,
+				JA   = 0x87,
+				JAE  = 0x83,
+				JB   = 0x82,
+				JBE  = 0x86,
+				JE   = 0x84,
+				JNE  = 0x85,
+				JG   = 0x8F,
+				JGE  = 0x8D,
+				JL   = 0x8C,
+				JLE  = 0x8E,
+			};
+		}
+
 		uint8_t get_prefix(Assembly::Registers::Reg src, Assembly::Registers::Reg dst){
 			assert(src != Assembly::Registers::NOT_REG && dst != Assembly::Registers::NOT_REG);
 
@@ -509,7 +527,7 @@ namespace Assembly {
 //
 	class Jmp: public Instruction {
 	private:
-		int64_t offset = 0;
+		int32_t offset = 0;
 		int64_t num = UNUSED;
 		const char* label;
 
@@ -529,11 +547,29 @@ namespace Assembly {
 
 			return output;
 		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		size_t size(){
+			return 5;
+		}
+
+
+		uint8_t* elf(){
+			static uint8_t output[5] = {Binary::JMP::JMP}; 
+		
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 1, val_code, 4);
+
+			return output;
+		}
 	};
 
 	class Jz: public Instruction {
 	private:
-		int64_t offset = 0;
+		int32_t offset = 0;
 		int64_t num = UNUSED;
 		const char* label;
 
@@ -553,13 +589,30 @@ namespace Assembly {
 
 			return output;
 		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		size_t size(){
+			return 6;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[6] = {0x0F, Binary::JMP::JE}; 
+		
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 2, val_code, 4);
+
+			return output;
+		}
 	};
 
 	class Jnz: public Instruction {
 	private:
-		int64_t offset = 0;
+		int32_t offset = 0;
 		int64_t num = UNUSED;
-		const char* label;
+		const char* label = nullptr;
 
 	public:	
 		Jnz(const char* label): label(label) {};
@@ -577,11 +630,29 @@ namespace Assembly {
 
 			return output;
 		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		size_t size(){
+			return 6;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[6] = {0x0F, Binary::JMP::JNE}; 
+		
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 2, val_code, 4);
+
+			return output;
+			
+		}
 	};
 
 	class Jg: public Instruction {
 	private:
-		int64_t offset = 0;
+		int32_t offset = 0;
 		int64_t num = UNUSED;
 		const char* label = nullptr;
 
@@ -601,11 +672,28 @@ namespace Assembly {
 
 			return output;
 		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		size_t size(){
+			return 6;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[6] = {0x0F, Binary::JMP::JG}; 
+		
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 2, val_code, 4);
+
+			return output;
+		}
 	};
 
 	class Jge: public Instruction {
 	private:
-		int64_t offset = 0;
+		int32_t offset = 0;
 		int64_t num = UNUSED;
 		const char* label;
 
@@ -625,12 +713,29 @@ namespace Assembly {
 
 			return output;
 		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		size_t size(){
+			return 6;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[6] = {0x0F, Binary::JMP::JGE}; 
+		
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 2, val_code, 4);
+
+			return output;
+		}
 	};
 
 
 	class Jl: public Instruction {
 	private:
-		int64_t offset = 0;
+		int32_t offset = 0;
 		int64_t num = UNUSED;
 		const char* label;
 
@@ -650,11 +755,28 @@ namespace Assembly {
 
 			return output;
 		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		size_t size(){
+			return 6;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[6] = {0x0F, Binary::JMP::JL}; 
+		
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 2, val_code, 4);
+
+			return output;
+		}
 	};
 
 	class Jle: public Instruction {
 	private:
-		int64_t offset = 0;
+		int32_t offset = 0;
 		int64_t num = UNUSED;
 		const char* label;
 
@@ -674,11 +796,28 @@ namespace Assembly {
 
 			return output;
 		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		size_t size(){
+			return 6;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[6] = {0x0F, Binary::JMP::JLE}; 
+		
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 2, val_code, 4);
+
+			return output;
+		}
 	};
 
 	class Call: public Instruction {
 	private:
-		int64_t offset = 0;
+		int32_t offset = 0;
 		const char* label;
 
 	public:	
@@ -687,6 +826,23 @@ namespace Assembly {
 		const char* assembly(){
 			static char output[128] = "";
 			sprintf(output, "\t\tcall %s", label); 
+
+			return output;
+		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		size_t size(){
+			return 5;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[5] = {Binary::JMP::CALL}; 
+		
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 1, val_code, 4);
 
 			return output;
 		}
@@ -708,6 +864,16 @@ namespace Assembly {
 			sprintf(output, "\t\tcmp %s, %s", Registers::names[dst], Registers::names[src]); 
 			return output;
 		}
+
+		size_t size(){
+			return 3;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[3] = {Binary::get_prefix(src, dst), Binary::CMP::REG, reg_mask(0b11000000, src, dst)}; 
+
+			return output;
+		}
 	};
 
 //===========================================================================//
@@ -724,6 +890,28 @@ namespace Assembly {
 		const char* assembly(){
 			static char output[128] = "";
 			sprintf(output, "\t\tpush %s", Registers::names[src]); 
+			return output;
+		}
+
+		size_t size(){
+			if (src <= Assembly::Registers::RDI){
+				return 1;
+			}
+
+			return 2;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[2] = {}; 
+			if (src <= Assembly::Registers::RDI){
+				output[0] = reg_mask(Binary::PUSH::REG, src);
+			}
+
+			else {
+				output[0] = Binary::REX::B;
+				output[1] = reg_mask(Binary::PUSH::REG, src);
+			}
+
 			return output;
 		}
 	};
@@ -744,16 +932,27 @@ namespace Assembly {
 			sprintf(output, "\t\tpop %s", Registers::names[dst]); 
 			return output;
 		}
+
+		size_t size(){
+				return 1;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[1] = {reg_mask(Binary::POP::REG, dst)}; 
+
+			return output;
+		}
 	};
 
 //===========================================================================//
-//                                POP 
+//                               LABEL 
 //===========================================================================//
 
 	class Label: public Instruction {
 	private:
 		const char* name  = nullptr;
 		const int64_t num = -1;
+		const int64_t offset = 0;
 	
 	public:
 		explicit Label(int64_t num): num(num) {} 
@@ -771,6 +970,10 @@ namespace Assembly {
 			}
 
 			return output;
+		}
+
+		size_t size(){
+			return 0;
 		}
 	};
 
@@ -870,182 +1073,3 @@ namespace Assembly {
 
 	};
 }
-
-/*
-namespace Binary {
-
-	namespace Registers {
-		enum Reg32 {
-			RAX = 0,
-			RCX = 1,
-			RDX = 2,
-			RBX = 3,
-			RBP = 4,
-			RSP = 5,
-			RSI = 6,
-			RDI = 7,
-		};
-
-		enum Reg64 {
-			R10 = 1,
-			R11 = 2,
-			R12 = 3,
-			R13 = 4,
-			R14 = 5,
-			R15 = 6
-		};
-	};
-
-
-	namespace Jump {
-		namespace Near {
-			enum {
-				CALL = 0xE8,
-				JMP  = 0xE9,
-				RET  = 0xC3,
-				JA   = 0x87,
-				JAE  = 0x83,
-				JB   = 0x82,
-				JBE  = 0x86,
-				JE   = 0x84,
-				JNE  = 0x85,
-				
-				JG   = 0x8F,
-				JGE  = 0x8D,
-				JL   = 0x8C,
-				JLE  = 0x8E,
-			};
-		}
-	}
-
-	uint8_t* AddR10R11(uint8_t* array){
-
-		uint8_t code[] = {Prefix::REX::WRB, Op::ADD, 0xDA};
-
-		memcpy(array, code, sizeof(code));	
-		return array + sizeof(code);
-	}
-
-	uint8_t* SubR10R11(uint8_t* array){
-
-		uint8_t code[] = {Prefix::REX::WRB, Op::SUB, 0xDA};
-
-		memcpy(array, code, sizeof(code));	
-		return array + sizeof(code);
-	}
-
-	uint8_t* ImulR10R11(uint8_t* array){
-
-		uint8_t code[] = {0x48, 0x0F, 0xAF, 0xD3};
-
-		memcpy(array, code, sizeof(code));	
-		return array + sizeof(code);
-	}
-
-	uint8_t* PushR10(uint8_t* array){
-
-		uint8_t code[] = {0x41, 0x52};
-
-		memcpy(array, code, sizeof(code));	
-		return array + sizeof(code);
-	}
-
-	uint8_t* PushRBP(uint8_t* array){
-
-		uint8_t code[] = {0x55};
-
-		memcpy(array, code, sizeof(code));	
-		return array + sizeof(code);
-	}
-
-	uint8_t* PopRBP(uint8_t* array){
-
-		uint8_t code[] = {0x5d};
-
-		memcpy(array, code, sizeof(code));	
-		return array + sizeof(code);
-	}
-
-	uint8_t* MovRSP2RBP(uint8_t* array){
-
-		uint8_t code[] = {0x48, 0x89, 0xE5};
-
-		memcpy(array, code, sizeof(code));	
-		return array + sizeof(code);
-	}
-
-	uint8_t* MovRBPtoRSP(uint8_t* array){
-
-		uint8_t code[] = {0x48, 0x89, 0xEC};
-
-		memcpy(array, code, sizeof(code));	
-		return array + sizeof(code);
-	}
-
-	uint8_t* MovNum2R10(uint32_t num, uint8_t* array){
-		uint8_t code[] = {0x48, 0xC7, 0xC2};
-		uint8_t* num_code = reinterpret_cast<uint8_t*>(&num);
-
-		memcpy(array, code, sizeof(code));	
-		array += sizeof(code);
-		memcpy(array, num_code, 4);	
-		return array + 4;
-	}
-
-	uint8_t* MovR102Mem(uint32_t offset, uint8_t* array){
-		uint8_t code[] = {0x4C, 0x89, 0x95};
-		uint8_t* offset_code = reinterpret_cast<uint8_t*>(&offset);
-
-		memcpy(array, code, sizeof(code));	
-		array += sizeof(code);
-		memcpy(array, offset_code, 4);	
-		return array + 4;
-	}
-
-	uint8_t* MovMem2R10(uint32_t offset, uint8_t* array){
-		uint8_t code[] = {0x48, 0x8B, 0x95};
-		uint8_t* offset_code = reinterpret_cast<uint8_t*>(&offset);
-
-		memcpy(array, code, sizeof(code));	
-		array += sizeof(code);
-		memcpy(array, offset_code, 4);	
-		return array + 4;
-	}
-
-	uint8_t* AddRSPNum(uint32_t num, uint8_t* array){
-		uint8_t code[] = {0x48, 0x81, 0xC4};
-		uint8_t* num_code = reinterpret_cast<uint8_t*>(&num);
-
-		memcpy(array, code, sizeof(code));	
-		array += sizeof(code);
-		memcpy(array, num_code, 4);	
-		return array + 4;
-	}
-	
-	uint8_t* SubRSPNum(uint32_t num, uint8_t* array){
-		uint8_t code[] = {0x48, 0x81, 0xEC};
-		uint8_t* num_code = reinterpret_cast<uint8_t*>(&num);
-
-		memcpy(array, code, sizeof(code));	
-		array += sizeof(code);
-		memcpy(array, num_code, 4);	
-		return array + 4;
-	}
-
-	uint8_t* MovR10toR11(uint8_t* array){
-		uint8_t code[] = {0x4D, 0x89, 0xD3};
-
-		memcpy(array, code, sizeof(code));	
-		array += sizeof(code);
-		return array;
-	}
-
-	uint8_t* Ret(uint8_t* array){
-		uint8_t code[] = {0xC3};
-
-		memcpy(array, code, sizeof(code));	
-		array += sizeof(code);
-		return array;
-	}
-};
-*/

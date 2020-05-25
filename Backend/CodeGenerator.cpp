@@ -4,8 +4,8 @@ namespace CodeGeneratorNS {
 	CodeGenerator::CodeGenerator(const ASTreeNS::ASTree& tree){
 		cur	= tree.root();
 		instructions.push_back(new Assembly::Section(".text"));
-		instructions.push_back(new Assembly::Array("num_format", "'%d', 10d, 0"));
-		instructions.push_back(new Assembly::Extern("_vprintf"));
+		//instructions.push_back(new Assembly::Array("num_format", "'%d', 10d, 0"));
+		//instructions.push_back(new Assembly::Extern("_vprintf"));
 		instructions.push_back(new Assembly::Global("_start"));
 		generate_block(cur->right());
 		
@@ -61,7 +61,7 @@ namespace CodeGeneratorNS {
 			node = node->left();
 		}
 
-		instructions.push_back(new Assembly::Comment(cur_bloc_num));
+		//instructions.push_back(new Assembly::Comment(cur_bloc_num));
 	}
 
 	void CodeGenerator::generate_func_declaration(ASTreeNS::ASTNode_t* node){
@@ -74,7 +74,7 @@ namespace CodeGeneratorNS {
 		local_offsets = new HashTable<const char*, int64_t, hash, strcmp, 509>();
 
 		instructions.push_back(new Assembly::Label(node->right()->key.lexem));
-		instructions.push_back(new Assembly::Comment("{"));
+		//instructions.push_back(new Assembly::Comment("{"));
 		instructions.push_back(new Assembly::PushReg(Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RBP, Assembly::Registers::RSP));
 
@@ -85,7 +85,7 @@ namespace CodeGeneratorNS {
 
 		generate_block(node->right()->right());
 
-		instructions.push_back(new Assembly::Comment("}"));
+		//instructions.push_back(new Assembly::Comment("}"));
 	}
 
 	void CodeGenerator::generate_expression(ASTreeNS::ASTNode_t* node){
