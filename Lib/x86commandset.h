@@ -1,8 +1,9 @@
 #pragma once
 #include "CompLib.hpp"
 
+
 namespace Assembly {
-	const int UNUSED = -1;
+	const int UNUSED = 0;
 
 	namespace Registers {
 		enum Reg {
@@ -11,8 +12,8 @@ namespace Assembly {
 			RBX,
 			RCX,
 			RDX,
-			RBP,
 			RSP,
+			RBP,
 			RSI,
 			RDI,
 			R10,
@@ -21,6 +22,23 @@ namespace Assembly {
 			R13,
 			R14,
 			R15
+		};
+
+		const uint8_t codes[] {
+			0, //rax
+			3, //rbx
+			1, //rcx
+			2, //rdx
+			4, //rsp
+			5, //rbp
+			6, //rsi
+			7, //rdi
+			2, //r10
+			3, //r11
+			4, //r12
+			5, //r13
+			6, //r14
+
 		};
 	
 		const char* names[] = {
@@ -39,18 +57,88 @@ namespace Assembly {
 			"r14",
 			"r15"
 		};
-
-		const char codes[] = {
-
+	};
+	
+	namespace Binary {
+	
+		namespace REX {
+			constexpr uint8_t O   = 0x40;
+			constexpr uint8_t B   = 0x41;
+			constexpr uint8_t W   = 0x48;
+			constexpr uint8_t WB  = 0x49;
+			constexpr uint8_t WR  = 0x4C;
+			constexpr uint8_t WRB = 0x4D;
+		}
+		
+		namespace PUSH {
+			enum {
+				REG = 0x50,
+				NUM = 0x68,
+			};
+		}
+	
+		namespace POP {
+			enum {
+				REG = 0x58,
+			};
+		}
+	
+		namespace MOV {
+			enum {
+				NUM = 0xC7,
+				REG = 0x89,
+				MEM = 0x8B
+			};
 		};
 	
+		namespace CMP {
+			enum {
+				REG = 0x39
+			};
+		}
+	
+		namespace OP {
+			enum {
+				ADD  = 0x01,
+				SUB  = 0x29,
+				IMUL = 0xAF,
+			};
+		}
+
+		uint8_t get_prefix(Assembly::Registers::Reg src, Assembly::Registers::Reg dst){
+			assert(src != Assembly::Registers::NOT_REG && dst != Assembly::Registers::NOT_REG);
+
+			if (src > Assembly::Registers::RDI && dst > Assembly::Registers::RDI){
+				return Binary::REX::WRB;
+			}
+
+			if (src > Assembly::Registers::RDI && dst <= Assembly::Registers::RDI){
+				return Binary::REX::WR;
+			}
+
+			else if (src <= Assembly::Registers::RDI && dst > Assembly::Registers::RDI){
+				return Binary::REX::WB;
+			}
+			
+			else {
+				return Binary::REX::W;
+			}
+		}
 	};
+
+	uint8_t reg_mask(uint8_t mask, Assembly::Registers::Reg src, Assembly::Registers::Reg dst){
+		return (mask | (Registers::codes[src] << 3) | Registers::codes[dst]);
+	}
+
+	uint8_t reg_mask(uint8_t mask, Assembly::Registers::Reg dst){
+		return (mask | Registers::codes[dst]);
+	}
 	
 	
 	class Instruction {
 	public:
 		virtual const char* assembly() {return 0;};
-		virtual const char* elf() { return 0;}
+		virtual const uint8_t* elf() { return 0;}
 		virtual size_t size() {return 0;};
 	};
 //===========================================================================//
@@ -72,6 +160,15 @@ namespace Assembly {
 
 				return output;
 			}
+
+			size_t size(){
+				return 3;
+			}
+
+			const uint8_t* elf(){
+				static uint8_t output[3] = {Binary::get_prefix(src, dst), Binary::MOV::REG, reg_mask(0b11000000, src, dst)};
+				return output;
+			}
 	};
 
 	class MovVal2Reg: public Instruction {
@@ -80,11 +177,22 @@ namespace Assembly {
 		int64_t val;
 	
 	public:
-		MovVal2Reg(Registers::Reg dst, int64_t val): dst(dst), val(val) {}
+		MovVal2Reg(Registers::Reg dst, int32_t val): dst(dst), val(val) {}
 
 		const char* assembly(){
 			static char output[128] = "";
 			sprintf(output, "\t\tmov %s, %ld", Registers::names[dst], val);
+			return output;
+		}
+
+		size_t size(){
+			return 7;
+		}
+
+		const uint8_t* elf(){
+			static uint8_t output[7] = {Binary::REX::W, Binary::MOV::NUM, reg_mask(0b11000000, dst)};
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&val);
+			memcpy(output + 3, val_code, 4);
 			return output;
 		}
 	};
@@ -94,29 +202,42 @@ namespace Assembly {
 		Registers::Reg src_reg = Registers::NOT_REG;
 		const char* src_label = nullptr;
 		Registers::Reg dst;
-		int64_t offset = UNUSED;
+		int8_t offset = UNUSED;
 
 	public:
-		MovMem2Reg(Registers::Reg dst, Registers::Reg src_reg, int64_t offset): src_reg(src_reg), dst(dst), offset(offset) {}
+		MovMem2Reg(Registers::Reg dst, Registers::Reg src_reg, int8_t offset): src_reg(src_reg), dst(dst), offset(offset) {}
 
 		MovMem2Reg(Registers::Reg dst, const char* src_label): src_label(src_label), dst(dst) {}
-		MovMem2Reg(Registers::Reg dst, int64_t offset): dst(dst), offset(offset) {}
+		MovMem2Reg(Registers::Reg dst, int8_t offset): dst(dst), offset(offset) {}
 
 		const char* assembly(){
 
 			static char output[128] = "";
 
 			if (src_reg != Registers::NOT_REG){
-				sprintf(output, "\t\tmov %s, [%s + %ld]", Registers::names[dst], Registers::names[src_reg], offset);
+				sprintf(output, "\t\tmov %s, [%s + %d]", Registers::names[dst], Registers::names[src_reg], offset);
 			}
 
 			else if (offset != UNUSED) {
-				sprintf(output, "\t\tmov %s, [%ld]", Registers::names[dst], offset);
+				sprintf(output, "\t\tmov %s, [%d]", Registers::names[dst], offset);
 			}
 
 			else {
 				sprintf(output, "\t\tmov %s, %s", Registers::names[dst], src_label);
 			}
+
+			return output;
+		}
+
+		size_t size(){
+			return 4;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[4] = {Binary::REX::W, Binary::MOV::MEM, 0x55 };
+
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 3, val_code, 1);
 
 			return output;
 		}
@@ -130,8 +251,8 @@ namespace Assembly {
 		int64_t offset = 0;
 
 	public:
-		MovReg2Mem(Registers::Reg dst, int64_t offset, Registers::Reg src_reg): src_reg(src_reg), dst(dst), offset(offset) {}
-		MovReg2Mem(int64_t offset, Registers::Reg src_reg): src_reg(src_reg), offset(offset) {}
+		MovReg2Mem(Registers::Reg dst, int32_t offset, Registers::Reg src_reg): src_reg(src_reg), dst(dst), offset(offset) {}
+		MovReg2Mem(int32_t offset, Registers::Reg src_reg): src_reg(src_reg), offset(offset) {}
 
 		const char* assembly(){
 
@@ -148,6 +269,18 @@ namespace Assembly {
 			return output;
 		}
 
+		size_t size(){
+			return 7;
+		}
+
+		const uint8_t* elf(){
+			static uint8_t output[7] = {Binary::REX::W, Binary::MOV::MEM, 0x95};
+
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			memcpy(output + 3, val_code, 4);
+
+			return output;
+		}
 	};
 
 //===========================================================================//
@@ -169,8 +302,18 @@ namespace Assembly {
 
 			return output;
 		}
+
+		size_t size(){
+			return 3;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[3] = {Binary::get_prefix(src, dst), Binary::OP::ADD, reg_mask(0b11000000, src, dst)};
+			return output;
+		}
 	};
 
+	/*
 	class AddMem2Reg: public Instruction {
 	private:
 		Registers::Reg src_reg = Registers::NOT_REG;
@@ -195,13 +338,13 @@ namespace Assembly {
 
 			return output;
 		}
-
 	};
+	*/
 
 	class AddVal2Reg: public Instruction {
 	private:
 		Registers::Reg dst;
-		int64_t src = 0;
+		int8_t src = 0;
 
 	public:	
 		AddVal2Reg(Registers::Reg dst, int64_t src): dst(dst), src(src) {};
@@ -209,8 +352,20 @@ namespace Assembly {
 		const char* assembly(){
 
 			static char output[128] = "";
-			sprintf(output, "\t\tadd %s, %ld", Registers::names[dst], src); 
+			sprintf(output, "\t\tadd %s, %d", Registers::names[dst], src); 
 
+			return output;
+		}
+
+		size_t size(){
+			return 4;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[4] = {Binary::REX::W, 0x83, 0xC4};
+
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&src);
+			memcpy(output + 3, val_code, 1);
 			return output;
 		}
 	};
@@ -235,21 +390,43 @@ namespace Assembly {
 
 			return output;
 		}
+
+		size_t size(){
+			return 3;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[3] = {Binary::get_prefix(src, dst), Binary::OP::SUB, reg_mask(0b11000000, src, dst)};
+			return output;
+		}
 	};
+
 
 	class SubReg2Val: public Instruction {
 	private:
 		Registers::Reg dst;
-		int64_t val;
+		int8_t val;
 
 	public:	
-		SubReg2Val(Registers::Reg dst, int64_t val): dst(dst), val(val) {};
+		SubReg2Val(Registers::Reg dst, int8_t val): dst(dst), val(val) {};
 
 		const char* assembly(){
 
 			static char output[128] = "";
-			sprintf(output, "\t\tsub %s, %ld", Registers::names[dst], val);
+			sprintf(output, "\t\tsub %s, %d", Registers::names[dst], val);
 
+			return output;
+		}
+
+		size_t size(){
+			return 4;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[4] = {Binary::REX::W, 0x83, 0xEC};
+
+			uint8_t* val_code = reinterpret_cast<uint8_t*>(&val);
+			memcpy(output + 3, val_code, 1);
 			return output;
 		}
 	};
@@ -271,6 +448,15 @@ namespace Assembly {
 			static char output[128] = "";
 			sprintf(output, "\t\timul %s, %s", Registers::names[dst], Registers::names[src]);
 
+			return output;
+		}
+
+		size_t size(){
+			return 4;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[4] = {Binary::REX::W, 0x0F, Binary::OP::IMUL, reg_mask(0b11000000, src, dst)};
 			return output;
 		}
 	};
@@ -304,6 +490,15 @@ namespace Assembly {
 	public:	
 		const char* assembly(){
 			static char output[128] = "\t\tret";
+			return output;
+		}
+
+		size_t size(){
+			return 1;
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[1] = {0xC3};
 			return output;
 		}
 	};
@@ -676,6 +871,7 @@ namespace Assembly {
 	};
 }
 
+/*
 namespace Binary {
 
 	namespace Registers {
@@ -700,16 +896,6 @@ namespace Binary {
 		};
 	};
 
-	namespace Prefix {
-		namespace REX {
-			constexpr uint8_t O   = 0x40;
-			constexpr uint8_t B   = 0x41;
-			constexpr uint8_t W   = 0x48;
-			constexpr uint8_t WB  = 0x49;
-			constexpr uint8_t WR  = 0x4C;
-			constexpr uint8_t WRB = 0x4D;
-		}
-	}
 
 	namespace Jump {
 		namespace Near {
@@ -730,40 +916,6 @@ namespace Binary {
 				JLE  = 0x8E,
 			};
 		}
-	}
-
-	namespace Push {
-		enum {
-			REG = 0x50,
-			NUM = 0x68,
-		};
-	}
-
-	namespace Pop {
-		enum {
-			REG = 0x58,
-		};
-	}
-
-	namespace Mov2Reg {
-		enum {
-			NUM = 0xB8,
-			REG = 0x89
-		};
-	};
-
-	namespace Cmp {
-		enum {
-			REG = 0x39
-		};
-	}
-
-	namespace Op {
-		enum {
-			ADD  = 0x01,
-			SUB  = 0x29,
-			IMUL = 0xAF,
-		};
 	}
 
 	uint8_t* AddR10R11(uint8_t* array){
@@ -896,3 +1048,4 @@ namespace Binary {
 		return array;
 	}
 };
+*/
