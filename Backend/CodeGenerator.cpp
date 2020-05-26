@@ -215,6 +215,7 @@ namespace CodeGeneratorNS {
 
 		generate_expression(node->right());
 
+		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RAX, Assembly::Registers::R10));
 		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RSP, Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::PopReg(Assembly::Registers::RBP));
 		instructions.push_back(new Assembly::Ret());
@@ -267,16 +268,25 @@ namespace CodeGeneratorNS {
 		}
 
 		generate_block(node->right()->right());
+		instructions.push_back(new Assembly::Jmp(num_blocks + 1));
 		generate_block(node->right()->left ());
+		instructions.push_back(new Assembly::Label(num_blocks++));
 	}
 
 	void CodeGenerator::generate_exit(ASTreeNS::ASTNode_t* node){
 		assert(node != nullptr);
 		assert(node->key.code == Operator::EXIT);
 
+		/*
 		instructions.push_back(new Assembly::MovVal2Reg(Assembly::Registers::RAX, 60));
 		instructions.push_back(new Assembly::MovVal2Reg(Assembly::Registers::RDI, 0));
 		instructions.push_back(new Assembly::Syscall());
+		*/
+
+		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RAX, Assembly::Registers::R10));
+		instructions.push_back(new Assembly::MovReg2Reg(Assembly::Registers::RSP, Assembly::Registers::RBP));
+		instructions.push_back(new Assembly::PopReg(Assembly::Registers::RBP));
+		instructions.push_back(new Assembly::Ret());
 	}
 
 	void CodeGenerator::generate_print(ASTreeNS::ASTNode_t* node){

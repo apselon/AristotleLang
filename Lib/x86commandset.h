@@ -223,7 +223,15 @@ namespace Assembly {
 
 		const uint8_t* elf(){
 			static uint8_t output[7] = {};
-			output[0] = Binary::REX::WB; 
+
+			if (dst <= Registers::RDI){
+				output[0] = Binary::REX::W; 
+			}
+
+			else {
+				output[0] = Binary::REX::WB;
+			}
+
 			output[1] = Binary::MOV::NUM;
 			output[2] = reg_mask(0b11000000, dst);
 			
@@ -270,7 +278,7 @@ namespace Assembly {
 		}
 
 		const uint8_t* elf(){
-			static uint8_t output[4] = {Binary::REX::W, Binary::MOV::MEM, 0x55 };
+			static uint8_t output[4] = {Binary::REX::WR, Binary::MOV::MEM, 0x55 };
 
 			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 3, val_code, 1);
@@ -351,34 +359,6 @@ namespace Assembly {
 			return output;
 		}
 	};
-
-	/*
-	class AddMem2Reg: public Instruction {
-	private:
-		Registers::Reg src_reg = Registers::NOT_REG;
-		Registers::Reg dst;
-		int64_t offset = 0;
-
-	public:
-		AddMem2Reg(Registers::Reg dst, Registers::Reg src_reg, int64_t offset): src_reg(src_reg), dst(dst), offset(offset) {}
-		AddMem2Reg(Registers::Reg dst, int64_t offset): dst(dst), offset(offset) {}
-
-		const char* assembly(){
-
-			static char output[128] = "";
-
-			if (src_reg != Registers::NOT_REG){
-				sprintf(output, "\t\tadd %s, [%s + %ld]", Registers::names[dst], Registers::names[src_reg], offset);
-			}
-
-			else {
-				sprintf(output, "\t\tadd %s, [%ld]", Registers::names[dst], offset);
-			}
-
-			return output;
-		}
-	};
-	*/
 
 	class AddVal2Reg: public Instruction {
 	private:
@@ -497,8 +477,8 @@ namespace Assembly {
 		}
 
 		const uint8_t* elf(){
-			static uint8_t output[4] = {Binary::REX::W, 0x0F, Binary::OP::IMUL, 0x90};
-			output[3] = reg_mask(0b11000000, src, dst);
+			static uint8_t output[4] = {Binary::REX::WRB, 0x0F, Binary::OP::IMUL, 0x90};
+			output[3] = reg_mask(0b11000000, dst, src);
 			return output;
 		}
 	};
