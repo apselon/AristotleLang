@@ -223,7 +223,7 @@ namespace Assembly {
 
 		const uint8_t* elf(){
 			static uint8_t output[7] = {};
-			output[0] = Binary::REX::W; 
+			output[0] = Binary::REX::WB; 
 			output[1] = Binary::MOV::NUM;
 			output[2] = reg_mask(0b11000000, dst);
 			
