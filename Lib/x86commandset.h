@@ -186,7 +186,11 @@ namespace Assembly {
 			}
 
 			const uint8_t* elf(){
-				static uint8_t output[3] = {Binary::get_prefix(src, dst), Binary::MOV::REG, reg_mask(0b11000000, src, dst)};
+				static uint8_t output[3] = {};
+				output[0] = Binary::get_prefix(src, dst);
+				output[1] = Binary::MOV::REG;
+				output[2] = reg_mask(0b11000000, src, dst);
+
 				return output;
 			}
 	};
@@ -210,8 +214,11 @@ namespace Assembly {
 		}
 
 		const uint8_t* elf(){
-			static uint8_t output[7] = {Binary::REX::W, Binary::MOV::NUM};
+			static uint8_t output[7] = {};
+			output[0] = Binary::REX::W; 
+			output[1] = Binary::MOV::NUM;
 			output[2] = reg_mask(0b11000000, dst);
+			
 			uint8_t* val_code = reinterpret_cast<uint8_t*>(&val);
 			memcpy(output + 3, val_code, 4);
 			return output;
@@ -295,7 +302,8 @@ namespace Assembly {
 		}
 
 		const uint8_t* elf(){
-			static uint8_t output[7] = {Binary::get_prefix(src_reg, dst), Binary::MOV::REG, 0x95};
+			static uint8_t output[7] = {0x90, Binary::MOV::REG, 0x95};
+			output[0] = Binary::get_prefix(src_reg, dst);
 
 			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
 			memcpy(output + 3, val_code, 4);
@@ -329,7 +337,9 @@ namespace Assembly {
 		}
 
 		uint8_t* elf(){
-			static uint8_t output[3] = {Binary::get_prefix(src, dst), Binary::OP::ADD, reg_mask(0b11000000, src, dst)};
+			static uint8_t output[3] = {0x90, Binary::OP::ADD, 0x90};
+			output[0] = Binary::get_prefix(src, dst);
+			output[2] = reg_mask(0b11000000, src, dst);
 			return output;
 		}
 	};
@@ -417,7 +427,9 @@ namespace Assembly {
 		}
 
 		uint8_t* elf(){
-			static uint8_t output[3] = {Binary::get_prefix(src, dst), Binary::OP::SUB, reg_mask(0b11000000, src, dst)};
+			static uint8_t output[3] = {0x90, Binary::OP::SUB, 0x90};
+			output[0] = Binary::get_prefix(src, dst);
+			output[2] = reg_mask(0b11000000, src, dst);
 			return output;
 		}
 	};
@@ -477,7 +489,8 @@ namespace Assembly {
 		}
 
 		uint8_t* elf(){
-			static uint8_t output[4] = {Binary::REX::W, 0x0F, Binary::OP::IMUL, reg_mask(0b11000000, src, dst)};
+			static uint8_t output[4] = {Binary::REX::W, 0x0F, Binary::OP::IMUL, 0x90};
+			output[3] = reg_mask(0b11000000, src, dst);
 			return output;
 		}
 	};
@@ -905,7 +918,9 @@ namespace Assembly {
 		}
 
 		uint8_t* elf(){
-			static uint8_t output[3] = {Binary::get_prefix(src, dst), Binary::CMP::REG, reg_mask(0b11000000, src, dst)}; 
+			static uint8_t output[3] = {0x90, Binary::CMP::REG, 0x90}; 
+			output[0] = Binary::get_prefix(src, dst);
+			output[2] = reg_mask(0b11000000, src, dst);
 
 			return output;
 		}
@@ -973,7 +988,8 @@ namespace Assembly {
 		}
 
 		uint8_t* elf(){
-			static uint8_t output[1] = {reg_mask(Binary::POP::REG, dst)}; 
+			static uint8_t output[1] = {0x90}; 
+			output[0] = reg_mask(Binary::POP::REG, dst);
 
 			return output;
 		}
