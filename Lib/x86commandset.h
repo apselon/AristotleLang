@@ -5,6 +5,12 @@
 namespace Assembly {
 	const int UNUSED = 0;
 
+		enum Spec_t {
+			ORDINARY = 0,
+			LABEL = 1,
+			JUMP  = 2,
+		};
+
 	namespace Registers {
 		enum Reg {
 			NOT_REG = -1,
@@ -154,13 +160,15 @@ namespace Assembly {
 	
 	class Instruction {
 	public:
-		virtual const char* assembly() {return 0;};
-		virtual const uint8_t* elf() { return 0;}
-		virtual size_t size() {return 0;};
-		void set_offset(int32_t new_offset){new_offset--;}
-		int is_jump(){return 0;}
-		const char* string() {return 0;}
+
+		virtual void set_offset(int32_t) {return  ;}
+		virtual const char* assembly()   {return 0;}
+		virtual const char* string()     {return 0;}
+		virtual const uint8_t* elf()     {return 0;}
+		virtual size_t size()            {return 0;}
+		virtual Spec_t spec_type()       {return ORDINARY;}
 	};
+
 //===========================================================================//
 //                                   MOV
 //===========================================================================//
@@ -219,7 +227,7 @@ namespace Assembly {
 			output[1] = Binary::MOV::NUM;
 			output[2] = reg_mask(0b11000000, dst);
 			
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&val);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&val);
 			memcpy(output + 3, val_code, 4);
 			return output;
 		}
@@ -261,10 +269,10 @@ namespace Assembly {
 			return 4;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[4] = {Binary::REX::W, Binary::MOV::MEM, 0x55 };
 
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 3, val_code, 1);
 
 			return output;
@@ -305,7 +313,7 @@ namespace Assembly {
 			static uint8_t output[7] = {0x90, Binary::MOV::REG, 0x95};
 			output[0] = Binary::get_prefix(src_reg, dst);
 
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 3, val_code, 4);
 
 			return output;
@@ -336,7 +344,7 @@ namespace Assembly {
 			return 3;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[3] = {0x90, Binary::OP::ADD, 0x90};
 			output[0] = Binary::get_prefix(src, dst);
 			output[2] = reg_mask(0b11000000, src, dst);
@@ -392,10 +400,10 @@ namespace Assembly {
 			return 4;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[4] = {Binary::REX::W, 0x83, 0xC4};
 
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&src);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&src);
 			memcpy(output + 3, val_code, 1);
 			return output;
 		}
@@ -426,7 +434,7 @@ namespace Assembly {
 			return 3;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[3] = {0x90, Binary::OP::SUB, 0x90};
 			output[0] = Binary::get_prefix(src, dst);
 			output[2] = reg_mask(0b11000000, src, dst);
@@ -455,10 +463,10 @@ namespace Assembly {
 			return 4;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[4] = {Binary::REX::W, 0x83, 0xEC};
 
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&val);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&val);
 			memcpy(output + 3, val_code, 1);
 			return output;
 		}
@@ -488,7 +496,7 @@ namespace Assembly {
 			return 4;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[4] = {Binary::REX::W, 0x0F, Binary::OP::IMUL, 0x90};
 			output[3] = reg_mask(0b11000000, src, dst);
 			return output;
@@ -531,7 +539,7 @@ namespace Assembly {
 			return 1;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[1] = {0xC3};
 			return output;
 		}
@@ -568,22 +576,35 @@ namespace Assembly {
 			offset = new_offset;
 		}
 
+		const char* string(){
+			char* output = new char[128]();
+			if (num == UNUSED){
+				sprintf(output, "%s", label); 
+			}
+
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+
 		size_t size(){
 			return 5;
 		}
 
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[5] = {Binary::JMP::JMP}; 
 		
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 1, val_code, 4);
 
 			return output;
 		}
 
-		int is_jump(){
-			return 1;
+		Spec_t spec_type(){
+			return JUMP;
 		}
 	};
 
@@ -610,6 +631,20 @@ namespace Assembly {
 			return output;
 		}
 
+		const char* string(){
+			char* output = new char[128]();
+			if (num == UNUSED){
+				sprintf(output, "%s", label); 
+			}
+
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+
+
 		void set_offset(int32_t new_offset){
 			offset = new_offset;
 		}
@@ -618,17 +653,17 @@ namespace Assembly {
 			return 6;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[6] = {0x0F, Binary::JMP::JE}; 
 		
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 2, val_code, 4);
 
 			return output;
 		}
 
-		int is_jump(){
-			return 1;
+		Spec_t spec_type(){
+			return JUMP;
 		}
 	};
 
@@ -655,6 +690,20 @@ namespace Assembly {
 			return output;
 		}
 
+		const char* string(){
+			char* output = new char[128]();
+			if (num == UNUSED){
+				sprintf(output, "%s", label); 
+			}
+
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+
+
 		void set_offset(int32_t new_offset){
 			offset = new_offset;
 		}
@@ -663,25 +712,25 @@ namespace Assembly {
 			return 6;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[6] = {0x0F, Binary::JMP::JNE}; 
 		
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 2, val_code, 4);
 
 			return output;
 			
 		}
 
-		int is_jump(){
-			return 1;
+		Spec_t spec_type(){
+			return JUMP;
 		}
 	};
 
 	class Jg: public Instruction {
 	private:
 		int32_t offset = 0;
-		int64_t num = UNUSED;
+		int64_t num = -1;
 		const char* label = nullptr;
 
 	public:	
@@ -701,6 +750,20 @@ namespace Assembly {
 			return output;
 		}
 
+		const char* string(){
+			char* output = new char[128]();
+			if (num == -1){
+				sprintf(output, "%s", label); 
+			}
+
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+
+
 		void set_offset(int32_t new_offset){
 			offset = new_offset;
 		}
@@ -709,17 +772,17 @@ namespace Assembly {
 			return 6;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[6] = {0x0F, Binary::JMP::JG}; 
 		
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 2, val_code, 4);
 
 			return output;
 		}
 
-		int is_jump(){
-			return 1;
+		Spec_t spec_type(){
+			return JUMP;
 		}
 	};
 
@@ -746,6 +809,20 @@ namespace Assembly {
 			return output;
 		}
 
+		const char* string(){
+			char* output = new char[128]();
+			if (num == UNUSED){
+				sprintf(output, "%s", label); 
+			}
+
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+
+
 		void set_offset(int32_t new_offset){
 			offset = new_offset;
 		}
@@ -754,17 +831,17 @@ namespace Assembly {
 			return 6;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[6] = {0x0F, Binary::JMP::JGE}; 
 		
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 2, val_code, 4);
 
 			return output;
 		}
 
-		int is_jump(){
-			return 1;
+		Spec_t spec_type(){
+			return JUMP;
 		}
 	};
 
@@ -792,6 +869,20 @@ namespace Assembly {
 			return output;
 		}
 
+		const char* string(){
+			char* output = new char[128]();
+			if (num == UNUSED){
+				sprintf(output, "%s", label); 
+			}
+
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+
+
 		void set_offset(int32_t new_offset){
 			offset = new_offset;
 		}
@@ -800,17 +891,17 @@ namespace Assembly {
 			return 6;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[6] = {0x0F, Binary::JMP::JL}; 
 		
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 2, val_code, 4);
 
 			return output;
 		}
 
-		int is_jump(){
-			return 1;
+		Spec_t spec_type(){
+			return JUMP;
 		}
 	};
 
@@ -837,6 +928,20 @@ namespace Assembly {
 			return output;
 		}
 
+		const char* string(){
+			char* output = new char[128]();
+			if (num == UNUSED){
+				sprintf(output, "%s", label); 
+			}
+
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+
+
 		void set_offset(int32_t new_offset){
 			offset = new_offset;
 		}
@@ -845,17 +950,17 @@ namespace Assembly {
 			return 6;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[6] = {0x0F, Binary::JMP::JLE}; 
 		
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 2, val_code, 4);
 
 			return output;
 		}
 
-		int is_jump(){
-			return 1;
+		Spec_t spec_type(){
+			return JUMP;
 		}
 	};
 
@@ -878,21 +983,28 @@ namespace Assembly {
 			offset = new_offset;
 		}
 
+		const char* string(){
+			char* output = new char[128]();
+			sprintf(output, "%s", label); 
+			return output;
+		}
+
+
 		size_t size(){
 			return 5;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[5] = {Binary::JMP::CALL}; 
 		
-			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
+			const uint8_t* val_code = reinterpret_cast<const uint8_t*>(&offset);
 			memcpy(output + 1, val_code, 4);
 
 			return output;
 		}
 
-		int is_jump(){
-			return 1;
+		Spec_t spec_type(){
+			return JUMP;
 		}
 	};
 
@@ -917,7 +1029,7 @@ namespace Assembly {
 			return 3;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[3] = {0x90, Binary::CMP::REG, 0x90}; 
 			output[0] = Binary::get_prefix(src, dst);
 			output[2] = reg_mask(0b11000000, src, dst);
@@ -951,7 +1063,7 @@ namespace Assembly {
 			return 2;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[2] = {}; 
 			if (src <= Assembly::Registers::RDI){
 				output[0] = reg_mask(Binary::PUSH::REG, src);
@@ -987,7 +1099,7 @@ namespace Assembly {
 				return 1;
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[1] = {0x90}; 
 			output[0] = reg_mask(Binary::POP::REG, dst);
 
@@ -1024,7 +1136,7 @@ namespace Assembly {
 		}
 
 		const char* string(){
-			static char output[128] = "";
+			char* output = new char[128]();
 			if (num == -1){
 				sprintf(output, "%s", name); 
 			}
@@ -1044,8 +1156,8 @@ namespace Assembly {
 			offset = new_offset;
 		}
 
-		int is_jump(){
-			return 0;
+		Spec_t spec_type(){
+			return LABEL;
 		}
 	};
 
@@ -1101,7 +1213,7 @@ namespace Assembly {
 			return 2;	
 		}
 
-		uint8_t* elf(){
+		const uint8_t* elf(){
 			static uint8_t output[2] = {0x0F, 0x05}; 
 			return output;
 		}

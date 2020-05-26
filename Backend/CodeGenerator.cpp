@@ -292,6 +292,32 @@ namespace CodeGeneratorNS {
 	size_t CodeGenerator::write_elf(uint8_t* buf){
 		assert(buf != nullptr);
 
+		int32_t cur_instruction_offset = 0;
+
+		HashTable<const char*, int32_t, hash, strcmp, 509> label_offsets;
+
+
+		for (size_t i = 0; i < instructions.size(); ++i){
+			cur_instruction_offset += instructions[i]->size();
+
+			if (instructions[i]->spec_type() == Assembly::LABEL){
+				label_offsets.insert(instructions[i]->string(), cur_instruction_offset);
+			}
+		}
+
+		cur_instruction_offset  = 0;
+		int32_t cur_label_offset = 0;
+
+		for (size_t i = 0; i < instructions.size(); ++i){
+
+			if (instructions[i]->spec_type() == Assembly::JUMP){
+				cur_label_offset = label_offsets.find(instructions[i]->string())->val.second;
+				instructions[i]->set_offset(cur_label_offset - cur_instruction_offset - instructions[i]->size());
+			}
+
+			cur_instruction_offset += instructions[i]->size();
+		}
+		
 		uint8_t* start = buf;
 
 		for (size_t i = 0; i < instructions.size(); ++i){

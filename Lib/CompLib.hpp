@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cassert>
 #include <cstdint>
+#include <map>
 
 #include "DSL.h"
 #include "x86commandset.h"
