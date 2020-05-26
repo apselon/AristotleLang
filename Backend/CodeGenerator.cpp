@@ -71,7 +71,7 @@ namespace CodeGeneratorNS {
 		cur_local_vars_num = 0;
 		cur_local_args_num = 0;
 
-		local_offsets = new HashTable<const char*, int64_t, hash, strcmp, 509>();
+		local_offsets = new HashTable<const char*, int32_t, hash, strcmp, 509>();
 
 		instructions.push_back(new Assembly::Label(node->right()->key.lexem));
 		//instructions.push_back(new Assembly::Comment("{"));
@@ -289,7 +289,20 @@ namespace CodeGeneratorNS {
 		instructions.push_back(new Assembly::Call("_vprintf"));
 	}
 
-	void CodeGenerator::write(FILE* output_f){
+	size_t CodeGenerator::write_elf(uint8_t* buf){
+		assert(buf != nullptr);
+
+		uint8_t* start = buf;
+
+		for (size_t i = 0; i < instructions.size(); ++i){
+			memcpy(buf, instructions[i]->elf(), instructions[i]->size());
+			buf += instructions[i]->size();
+		}
+
+		return buf - start;
+	};
+
+	void CodeGenerator::write_asm(FILE* output_f){
 		assert(output_f != nullptr);
 
 		for (size_t i = 0; i < instructions.size(); ++i){
@@ -297,11 +310,11 @@ namespace CodeGeneratorNS {
 		}
 	}
 
-	void CodeGenerator::write(const char* filename){
+	void CodeGenerator::write_asm(const char* filename){
 		assert(filename != nullptr);
 
 		FILE* output_f = fopen(filename, "w");
-		write(output_f);
+		write_asm(output_f);
 		fclose(output_f);
 	}
 }

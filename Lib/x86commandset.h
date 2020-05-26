@@ -55,7 +55,6 @@ namespace Assembly {
 			"r12",
 			"r13",
 			"r14",
-			"r15"
 		};
 	};
 	
@@ -158,6 +157,9 @@ namespace Assembly {
 		virtual const char* assembly() {return 0;};
 		virtual const uint8_t* elf() { return 0;}
 		virtual size_t size() {return 0;};
+		void set_offset(int32_t new_offset){new_offset--;}
+		int is_jump(){return 0;}
+		const char* string() {return 0;}
 	};
 //===========================================================================//
 //                                   MOV
@@ -192,14 +194,14 @@ namespace Assembly {
 	class MovVal2Reg: public Instruction {
 	private:
 		Registers::Reg dst;
-		int64_t val;
+		int32_t val;
 	
 	public:
 		MovVal2Reg(Registers::Reg dst, int32_t val): dst(dst), val(val) {}
 
 		const char* assembly(){
 			static char output[128] = "";
-			sprintf(output, "\t\tmov %s, %ld", Registers::names[dst], val);
+			sprintf(output, "\t\tmov %s, %d", Registers::names[dst], val);
 			return output;
 		}
 
@@ -208,7 +210,8 @@ namespace Assembly {
 		}
 
 		const uint8_t* elf(){
-			static uint8_t output[7] = {Binary::REX::W, Binary::MOV::NUM, reg_mask(0b11000000, dst)};
+			static uint8_t output[7] = {Binary::REX::W, Binary::MOV::NUM};
+			output[2] = reg_mask(0b11000000, dst);
 			uint8_t* val_code = reinterpret_cast<uint8_t*>(&val);
 			memcpy(output + 3, val_code, 4);
 			return output;
@@ -266,7 +269,7 @@ namespace Assembly {
 	private:
 		Registers::Reg src_reg = Registers::NOT_REG;
 		Registers::Reg dst;
-		int64_t offset = 0;
+		int32_t offset = 0;
 
 	public:
 		MovReg2Mem(Registers::Reg dst, int32_t offset, Registers::Reg src_reg): src_reg(src_reg), dst(dst), offset(offset) {}
@@ -277,11 +280,11 @@ namespace Assembly {
 			static char output[128] = "";
 
 			if (src_reg != Registers::NOT_REG){
-				sprintf(output, "\t\tmov [%s + %ld], %s", Registers::names[dst], offset, Registers::names[src_reg]);
+				sprintf(output, "\t\tmov [%s + %d], %s", Registers::names[dst], offset, Registers::names[src_reg]);
 			}
 
 			else {
-				sprintf(output, "\t\tmov [%ld], %s", offset, Registers::names[src_reg]);
+				sprintf(output, "\t\tmov [%d], %s", offset, Registers::names[src_reg]);
 			}
 
 			return output;
@@ -292,7 +295,7 @@ namespace Assembly {
 		}
 
 		const uint8_t* elf(){
-			static uint8_t output[7] = {Binary::REX::W, Binary::MOV::MEM, 0x95};
+			static uint8_t output[7] = {Binary::get_prefix(src_reg, dst), Binary::MOV::REG, 0x95};
 
 			uint8_t* val_code = reinterpret_cast<uint8_t*>(&offset);
 			memcpy(output + 3, val_code, 4);
@@ -365,7 +368,7 @@ namespace Assembly {
 		int8_t src = 0;
 
 	public:	
-		AddVal2Reg(Registers::Reg dst, int64_t src): dst(dst), src(src) {};
+		AddVal2Reg(Registers::Reg dst, int8_t src): dst(dst), src(src) {};
 
 		const char* assembly(){
 
@@ -565,6 +568,10 @@ namespace Assembly {
 
 			return output;
 		}
+
+		int is_jump(){
+			return 1;
+		}
 	};
 
 	class Jz: public Instruction {
@@ -605,6 +612,10 @@ namespace Assembly {
 			memcpy(output + 2, val_code, 4);
 
 			return output;
+		}
+
+		int is_jump(){
+			return 1;
 		}
 	};
 
@@ -648,6 +659,10 @@ namespace Assembly {
 			return output;
 			
 		}
+
+		int is_jump(){
+			return 1;
+		}
 	};
 
 	class Jg: public Instruction {
@@ -689,6 +704,10 @@ namespace Assembly {
 
 			return output;
 		}
+
+		int is_jump(){
+			return 1;
+		}
 	};
 
 	class Jge: public Instruction {
@@ -729,6 +748,10 @@ namespace Assembly {
 			memcpy(output + 2, val_code, 4);
 
 			return output;
+		}
+
+		int is_jump(){
+			return 1;
 		}
 	};
 
@@ -772,6 +795,10 @@ namespace Assembly {
 
 			return output;
 		}
+
+		int is_jump(){
+			return 1;
+		}
 	};
 
 	class Jle: public Instruction {
@@ -813,6 +840,10 @@ namespace Assembly {
 
 			return output;
 		}
+
+		int is_jump(){
+			return 1;
+		}
 	};
 
 	class Call: public Instruction {
@@ -845,6 +876,10 @@ namespace Assembly {
 			memcpy(output + 1, val_code, 4);
 
 			return output;
+		}
+
+		int is_jump(){
+			return 1;
 		}
 	};
 
@@ -952,7 +987,7 @@ namespace Assembly {
 	private:
 		const char* name  = nullptr;
 		const int64_t num = -1;
-		const int64_t offset = 0;
+		int32_t offset = 0;
 	
 	public:
 		explicit Label(int64_t num): num(num) {} 
@@ -972,7 +1007,28 @@ namespace Assembly {
 			return output;
 		}
 
+		const char* string(){
+			static char output[128] = "";
+			if (num == -1){
+				sprintf(output, "%s", name); 
+			}
+			
+			else {
+				sprintf(output, ".Block%ld", num); 
+			}
+
+			return output;
+		}
+
 		size_t size(){
+			return 0;
+		}
+
+		void set_offset(int32_t new_offset){
+			offset = new_offset;
+		}
+
+		int is_jump(){
 			return 0;
 		}
 	};
@@ -1022,6 +1078,15 @@ namespace Assembly {
 		Syscall(){};
 		const char* assembly(){
 			static char output[128] = "\t\tsyscall";
+			return output;
+		}
+
+		size_t size(){
+			return 2;	
+		}
+
+		uint8_t* elf(){
+			static uint8_t output[2] = {0x0F, 0x05}; 
 			return output;
 		}
 	};

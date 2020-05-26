@@ -22,7 +22,7 @@ namespace CodeGeneratorNS {
 		void generate_exit(ASTreeNS::ASTNode_t* node);
 		void generate_print(ASTreeNS::ASTNode_t* node);
 
-		HashTable<const char*, int64_t, hash, strcmp, 509>* local_offsets = nullptr;
+		HashTable<const char*, int32_t, hash, strcmp, 509>* local_offsets = nullptr;
 		size_t cur_local_vars_num = 0;
 		size_t cur_local_args_num = 0;
 
@@ -34,8 +34,10 @@ namespace CodeGeneratorNS {
 	public:
 		CodeGenerator(const ASTreeNS::ASTree& tree);
 
-		void write(const char* filename);
-		void write(FILE* output_f);
+		void write_asm(const char* filename);
+		void write_asm(FILE* output_f);
+
+		size_t write_elf(uint8_t* buf);
 			
 	};
 };
